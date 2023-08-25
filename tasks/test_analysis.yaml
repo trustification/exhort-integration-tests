@@ -1,0 +1,98 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: test-analysis
+spec:
+  description: >-
+    Expects the analysis to evaluate an SBOM
+  params:
+    - name: SNAPSHOT
+      description: Expected output of the application endpoint
+    - default: 'default'
+      name: NAMESPACE
+      description: Namespace of the application under test
+    - default: >
+        {"summary":{"dependencies":{"scanned":0,"transitive":0},"vulnerabilities":{"direct":0,"total":0,"critical":0,"high":0,"medium":0,"low":0},"providerStatuses":[{"ok":true,"provider":"snyk","status":200,"message":"OK"}]},"dependencies":[]}
+      name: EXPECTED_OUTPUT
+      description: Expected analysis response of the analysis
+    - default: ""
+      name: PORT
+      description: Application endpoint Port
+    - default: "cyclonedx"
+      name: SBOM_TYPE
+      description: SBOM type to use in the test (cyclonedx or spdx)
+    - name: SBOM_CONTENTS
+      description: SBOM Json contents to test. The format must match the SBOM type
+      default: >
+          {
+              "bomFormat": "CycloneDX",
+              "specVersion": "1.4",
+              "serialNumber": "urn:uuid:21e8d828-b07f-4fd3-bd14-0458f7188d40",
+              "version": 1,
+              "metadata": {
+                  "component": {
+                      "group": "org.acme.dbaas",
+                      "name": "postgresql-orm-quarkus",
+                      "version": "1.0.0-SNAPSHOT",
+                      "licenses": [],
+                      "purl": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar",
+                      "type": "library",
+                      "bom-ref": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar"
+                  }
+              },
+              "components": [
+                  {
+                      "publisher": "JBoss by Red Hat",
+                      "group": "io.quarkus",
+                      "name": "quarkus-hibernate-orm",
+                      "version": "2.13.5.Final",
+                      "scope": "optional",
+                  }
+              ],
+              "dependencies": []
+          }
+  results:
+    - name: TEST_OUTPUT
+      description: Test output
+  steps:
+    - image: quay.io/redhat-appstudio/hacbs-test:latest
+      env:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
+        - name: EXPECTED_OUTPUT
+          value: $(params.EXPECTED_OUTPUT)
+        - name: PORT
+          value: $(params.PORT)
+        - name: SBOM_TYPE
+          value: $(params.SBOM_TYPE)
+        - name: SBOM_CONTENTS
+          value: $(params.SBOM_CONTENTS)
+      script: |
+        #!/usr/bin/env bash
+        export KUBECONFIG=$(workspaces.cluster-credentials.path)/kubeconfig
+        
+        # Get the route for the application endpoint
+        COMPONENT_NAME=$(echo -n ${SNAPSHOT} | jq -r .components[0].name)
+        ROUTE_NAME=$(oc get routes -l app.kubernetes.io/name="${COMPONENT_NAME}" -o name)
+        HOST=$(oc get "${ROUTE_NAME}" -o jsonpath={.spec.host} -n "${NAMESPACE}")
+        echo "Found target host ${HOST} for app ${APPLICATION_NAME}"
+        
+        # Check the analysis endpoint
+        ENDPOINT_OUTPUT=$(curl -k https://${HOST}:${PORT}/api/v3/analysis -H 'Content-Type: application/vnd.${SBOM_TYPE}+json' -d ${SBOM_CONTENTS})
+        echo -e "The endpoint outputs the following:\n ${ENDPOINT_OUTPUT}"
+        echo -e "Expected endpoint output:\n ${EXPECTED_OUTPUT}"
+        
+        if [[ "${ENDPOINT_OUTPUT}" == "${EXPECTED_OUTPUT}" ]]; then
+          RESULT="SUCCESS"
+        else
+          RESULT="FAILURE"
+        fi
+
+        TEST_OUTPUT=$(jq -rc --arg date $(date +%s) --arg RESULT "${RESULT}" --null-input \
+          '{result: $RESULT, timestamp: $date, failures: 0, successes: 0, warnings: 0}')
+        echo -n "${TEST_OUTPUT}" | tee $(results.TEST_OUTPUT.path)
+  workspaces:
+    - name: cluster-credentials
+      optional: true

@@ -1,0 +1,177 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: integration-exhort-app
+spec:
+  description: >-
+    Expects a Snapshot of a simple application with endpoint containing the expected output to be deployed on an environment. 
+    A secret containing the kubeconfig for the environment needs to be mounted via the cluster-credentials workspace binding.
+    The route to the single component is expected to have the same name as the component (default appstudio behavior).
+
+    Expects the Application to be up and healthy.
+
+    Expects the Exhort application to process the provided CycloneDX and SPDX SBOMS.
+  params:
+    - description: 'Snapshot of the application'
+      name: SNAPSHOT
+      default: '{"components": [{"name":"test-app", "containerImage": "quay.io/example/repo:latest"}]}'
+      type: string
+    - description: 'Namespace where the application is running'
+      name: NAMESPACE
+      default: "default"
+      type: string
+    - description: 'Expected status output'
+      name: EXPECTED_STATUS
+      default: "UP"
+    - description: 'Expected analysis output'
+      name: EXPECTED_ANALYSIS
+      default: >
+        {"summary":{"dependencies":{"scanned":0,"transitive":0},"vulnerabilities":{"direct":0,"total":0,"critical":0,"high":0,"medium":0,"low":0},"providerStatuses":[{"ok":true,"provider":"snyk","status":200,"message":"OK"}]},"dependencies":[]}
+      type: string
+    - description: 'Application endpoint port'
+      name: PORT
+      default: ""
+      type: string
+    - name: SPDX_SBOM
+      description: SPDX SBOM to analyse
+      default: >
+        {
+          "SPDXID" : "SPDXRef-DOCUMENT",
+          "spdxVersion" : "SPDX-2.3",
+          "creationInfo" : {
+            "comment" : "Converted from CycloneDX spec version 1.4",
+            "created" : "2023-05-16T14:37:58Z",
+            "creators" : [ "Tool: OWASP Foundation:CycloneDX Maven plugin makeAggregateBom compile+provided+runtime+system-2.7.6", "Tool: CycloneToSpdx-0.1.4" ],
+            "licenseListVersion" : "3.21"
+          },
+          "name" : "org.acme.dbaas:postgresql-orm-quarkus",
+          "dataLicense" : "CC0-1.0",
+          "documentNamespace" : "https://cyclonedx/21e8d828-b07f-4fd3-bd14-0458f7188d40_1",
+          "packages" : [ {
+            "SPDXID" : "SPDXRef-pkg-maven-org.acme.dbaas-postgresql-orm-quarkus-1.0.0-SNAPSHOT-type-jar",
+            "copyrightText" : "NOASSERTION",
+            "downloadLocation" : "NOASSERTION",
+            "externalRefs" : [ {
+              "referenceCategory" : "PACKAGE-MANAGER",
+              "referenceLocator" : "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar",
+              "referenceType" : "purl"
+            } ],
+            "filesAnalyzed" : false,
+            "name" : "org.acme.dbaas:postgresql-orm-quarkus",
+            "primaryPackagePurpose" : "LIBRARY",
+            "versionInfo" : "1.0.0-SNAPSHOT"
+          } ],
+          "relationships" : [ {
+            "spdxElementId" : "SPDXRef-DOCUMENT",
+            "relationshipType" : "DESCRIBES",
+            "relatedSpdxElement" : "SPDXRef-pkg-maven-org.acme.dbaas-postgresql-orm-quarkus-1.0.0-SNAPSHOT-type-jar"
+          } ]
+        }
+    - name: CYCLONEDX_SBOM
+      description: CycloneDX SBOM to analyse
+      default: >
+        {
+            "bomFormat": "CycloneDX",
+            "specVersion": "1.4",
+            "serialNumber": "urn:uuid:21e8d828-b07f-4fd3-bd14-0458f7188d40",
+            "version": 1,
+            "metadata": {
+                "component": {
+                    "group": "org.acme.dbaas",
+                    "name": "postgresql-orm-quarkus",
+                    "version": "1.0.0-SNAPSHOT",
+                    "licenses": [],
+                    "purl": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar",
+                    "type": "library",
+                    "bom-ref": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar"
+                }
+            },
+            "components": [
+                {
+                    "publisher": "JBoss by Red Hat",
+                    "group": "io.quarkus",
+                    "name": "quarkus-hibernate-orm",
+                    "version": "2.13.5.Final",
+                    "scope": "optional"
+                }
+            ],
+            "dependencies": []
+        }
+  tasks:
+    - name: test-app-health
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/test_app_health.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
+        - name: EXPECTED_OUTPUT
+          value: $(params.EXPECTED_STATUS)
+        - name: PORT
+          value: $(params.PORT)
+      workspaces:
+        - name: cluster-credentials
+          workspace: cluster-credentials
+    - name: test-analysis-cyclonedx
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/test_analysis.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
+        - name: EXPECTED_OUTPUT
+          value: $(params.EXPECTED_ANALYSIS)
+        - name: SBOM_TYPE
+          value: cyclonedx
+        - name: SBOM_CONTENTS
+          value: $(params.CYCLONEDX_SBOM)
+        - name: PORT
+          value: $(params.PORT)
+      workspaces:
+        - name: cluster-credentials
+          workspace: cluster-credentials
+    - name: test-analysis-spdx
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/test_analysis.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
+        - name: EXPECTED_OUTPUT
+          value: $(params.EXPECTED_ANALYSIS)
+        - name: SBOM_TYPE
+          value: spdx
+        - name: SBOM_CONTENTS
+          value: $(params.SPDX_SBOM)
+        - name: PORT
+          value: $(params.PORT)
+      workspaces:
+        - name: cluster-credentials
+          workspace: cluster-credentials
+  workspaces:
+    - name: cluster-credentials
+      optional: true
