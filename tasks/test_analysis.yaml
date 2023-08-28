@@ -23,7 +23,7 @@ spec:
       description: SBOM type to use in the test (cyclonedx or spdx)
     - name: SBOM_CONTENTS
       description: SBOM Json contents to test. The format must match the SBOM type
-      default: >
+      default: >-
           {
               "bomFormat": "CycloneDX",
               "specVersion": "1.4",
@@ -71,16 +71,24 @@ spec:
           value: $(params.SBOM_CONTENTS)
       script: |
         #!/usr/bin/env bash
-        export KUBECONFIG=$(workspaces.cluster-credentials.path)/kubeconfig
+
+        ## Temporary workaround due to a bug mounting the credentials secret
+        HOST=exhortuu5e-trusted-content-tenant.apps.stone-prd-rh01.pg1f.p1.openshiftapps.com
+        PORT=80
+        
+        ## START - Original
+        # export KUBECONFIG=$(workspaces.cluster-credentials.path)/kubeconfig
         
         # Get the route for the application endpoint
-        COMPONENT_NAME=$(echo -n ${SNAPSHOT} | jq -r .components[0].name)
-        ROUTE_NAME=$(oc get routes -l app.kubernetes.io/name="${COMPONENT_NAME}" -o name)
-        HOST=$(oc get "${ROUTE_NAME}" -o jsonpath={.spec.host} -n "${NAMESPACE}")
-        echo "Found target host ${HOST} for app ${APPLICATION_NAME}"
-        
+        # COMPONENT_NAME=$(echo -n ${SNAPSHOT} | jq -r .components[0].name)
+        # ROUTE_NAME=$(oc get routes -l app.kubernetes.io/name="${COMPONENT_NAME}" -o name)
+        # HOST=$(oc get "${ROUTE_NAME}" -o jsonpath={.spec.host} -n "${NAMESPACE}")
+        # echo "Found target host ${HOST} for app ${APPLICATION_NAME}"
+        ## END - Original
+
         # Check the analysis endpoint
-        ENDPOINT_OUTPUT=$(curl -k https://${HOST}:${PORT}/api/v3/analysis -H 'Content-Type: application/vnd.${SBOM_TYPE}+json' -d ${SBOM_CONTENTS})
+        ENDPOINT_OUTPUT=$(curl -k http://${HOST}:${PORT}/api/v3/analysis -H 'Content-Type: application/vnd.${SBOM_TYPE}+json' -d ${SBOM_CONTENTS})
+
         echo -e "The endpoint outputs the following:\n ${ENDPOINT_OUTPUT}"
         echo -e "Expected endpoint output:\n ${EXPECTED_OUTPUT}"
         
