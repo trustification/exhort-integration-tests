@@ -21,36 +21,6 @@ spec:
     - default: "cyclonedx"
       name: SBOM_TYPE
       description: SBOM type to use in the test (cyclonedx or spdx)
-    - name: SBOM_CONTENTS
-      description: SBOM Json contents to test. The format must match the SBOM type
-      default: >-
-          {
-              "bomFormat": "CycloneDX",
-              "specVersion": "1.4",
-              "serialNumber": "urn:uuid:21e8d828-b07f-4fd3-bd14-0458f7188d40",
-              "version": 1,
-              "metadata": {
-                  "component": {
-                      "group": "org.acme.dbaas",
-                      "name": "postgresql-orm-quarkus",
-                      "version": "1.0.0-SNAPSHOT",
-                      "licenses": [],
-                      "purl": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar",
-                      "type": "library",
-                      "bom-ref": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar"
-                  }
-              },
-              "components": [
-                  {
-                      "publisher": "JBoss by Red Hat",
-                      "group": "io.quarkus",
-                      "name": "quarkus-hibernate-orm",
-                      "version": "2.13.5.Final",
-                      "scope": "optional",
-                  }
-              ],
-              "dependencies": []
-          }
   results:
     - name: TEST_OUTPUT
       description: Test output
@@ -67,8 +37,6 @@ spec:
           value: $(params.PORT)
         - name: SBOM_TYPE
           value: $(params.SBOM_TYPE)
-        - name: SBOM_CONTENTS
-          value: $(params.SBOM_CONTENTS)
       script: |
         #!/usr/bin/env bash
 
@@ -87,7 +55,69 @@ spec:
         ## END - Original
 
         # Check the analysis endpoint
-        ENDPOINT_OUTPUT=$(curl -k http://${HOST}:${PORT}/api/v3/analysis -H 'Content-Type: application/vnd.${SBOM_TYPE}+json' -d ${SBOM_CONTENTS})
+        if [[ "${SBOM_TYPE}" == "spdx" ]]; then
+          ENDPOINT_OUTPUT=$(curl -k http://${HOST}:${PORT}/api/v3/analysis -H 'Content-Type: application/vnd.'${SBOM_TYPE}'+json' -d '{
+            "SPDXID" : "SPDXRef-DOCUMENT",
+            "spdxVersion" : "SPDX-2.3",
+            "creationInfo" : {
+              "comment" : "Converted from CycloneDX spec version 1.4",
+              "created" : "2023-05-16T14:37:58Z",
+              "creators" : [ "Tool: OWASP Foundation:CycloneDX Maven plugin makeAggregateBom compile+provided+runtime+system-2.7.6", "Tool: CycloneToSpdx-0.1.4" ],
+              "licenseListVersion" : "3.21"
+            },
+            "name" : "org.acme.dbaas:postgresql-orm-quarkus",
+            "dataLicense" : "CC0-1.0",
+            "documentNamespace" : "https://cyclonedx/21e8d828-b07f-4fd3-bd14-0458f7188d40_1",
+            "packages" : [ {
+              "SPDXID" : "SPDXRef-pkg-maven-org.acme.dbaas-postgresql-orm-quarkus-1.0.0-SNAPSHOT-type-jar",
+              "copyrightText" : "NOASSERTION",
+              "downloadLocation" : "NOASSERTION",
+              "externalRefs" : [ {
+                "referenceCategory" : "PACKAGE-MANAGER",
+                "referenceLocator" : "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar",
+                "referenceType" : "purl"
+              } ],
+              "filesAnalyzed" : false,
+              "name" : "org.acme.dbaas:postgresql-orm-quarkus",
+              "primaryPackagePurpose" : "LIBRARY",
+              "versionInfo" : "1.0.0-SNAPSHOT"
+            } ],
+            "relationships" : [ {
+              "spdxElementId" : "SPDXRef-DOCUMENT",
+              "relationshipType" : "DESCRIBES",
+              "relatedSpdxElement" : "SPDXRef-pkg-maven-org.acme.dbaas-postgresql-orm-quarkus-1.0.0-SNAPSHOT-type-jar"
+            } ]
+          }')
+        else
+          ENDPOINT_OUTPUT=$(curl -k http://${HOST}:${PORT}/api/v3/analysis -H 'Content-Type: application/vnd.'${SBOM_TYPE}'+json' -d '{
+            "bomFormat": "CycloneDX",
+            "specVersion": "1.4",
+            "serialNumber": "urn:uuid:21e8d828-b07f-4fd3-bd14-0458f7188d40",
+            "version": 1,
+            "metadata": {
+                "component": {
+                    "group": "org.acme.dbaas",
+                    "name": "postgresql-orm-quarkus",
+                    "version": "1.0.0-SNAPSHOT",
+                    "licenses": [],
+                    "purl": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar",
+                    "type": "library",
+                    "bom-ref": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar"
+                }
+            },
+            "components": [
+                {
+                    "publisher": "JBoss by Red Hat",
+                    "group": "io.quarkus",
+                    "name": "quarkus-hibernate-orm",
+                    "version": "2.13.5.Final",
+                    "scope": "optional"
+                }
+            ],
+            "dependencies": []
+          }')
+        fi
+
 
         echo -e "The endpoint outputs the following:\n ${ENDPOINT_OUTPUT}"
         echo -e "Expected endpoint output:\n ${EXPECTED_OUTPUT}"

@@ -32,71 +32,6 @@ spec:
       name: PORT
       default: ""
       type: string
-    - name: SPDX_SBOM
-      description: SPDX SBOM to analyse
-      default: >-
-        {
-          "SPDXID" : "SPDXRef-DOCUMENT",
-          "spdxVersion" : "SPDX-2.3",
-          "creationInfo" : {
-            "comment" : "Converted from CycloneDX spec version 1.4",
-            "created" : "2023-05-16T14:37:58Z",
-            "creators" : [ "Tool: OWASP Foundation:CycloneDX Maven plugin makeAggregateBom compile+provided+runtime+system-2.7.6", "Tool: CycloneToSpdx-0.1.4" ],
-            "licenseListVersion" : "3.21"
-          },
-          "name" : "org.acme.dbaas:postgresql-orm-quarkus",
-          "dataLicense" : "CC0-1.0",
-          "documentNamespace" : "https://cyclonedx/21e8d828-b07f-4fd3-bd14-0458f7188d40_1",
-          "packages" : [ {
-            "SPDXID" : "SPDXRef-pkg-maven-org.acme.dbaas-postgresql-orm-quarkus-1.0.0-SNAPSHOT-type-jar",
-            "copyrightText" : "NOASSERTION",
-            "downloadLocation" : "NOASSERTION",
-            "externalRefs" : [ {
-              "referenceCategory" : "PACKAGE-MANAGER",
-              "referenceLocator" : "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar",
-              "referenceType" : "purl"
-            } ],
-            "filesAnalyzed" : false,
-            "name" : "org.acme.dbaas:postgresql-orm-quarkus",
-            "primaryPackagePurpose" : "LIBRARY",
-            "versionInfo" : "1.0.0-SNAPSHOT"
-          } ],
-          "relationships" : [ {
-            "spdxElementId" : "SPDXRef-DOCUMENT",
-            "relationshipType" : "DESCRIBES",
-            "relatedSpdxElement" : "SPDXRef-pkg-maven-org.acme.dbaas-postgresql-orm-quarkus-1.0.0-SNAPSHOT-type-jar"
-          } ]
-        }
-    - name: CYCLONEDX_SBOM
-      description: CycloneDX SBOM to analyse
-      default: >-
-        {
-            "bomFormat": "CycloneDX",
-            "specVersion": "1.4",
-            "serialNumber": "urn:uuid:21e8d828-b07f-4fd3-bd14-0458f7188d40",
-            "version": 1,
-            "metadata": {
-                "component": {
-                    "group": "org.acme.dbaas",
-                    "name": "postgresql-orm-quarkus",
-                    "version": "1.0.0-SNAPSHOT",
-                    "licenses": [],
-                    "purl": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar",
-                    "type": "library",
-                    "bom-ref": "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT?type=jar"
-                }
-            },
-            "components": [
-                {
-                    "publisher": "JBoss by Red Hat",
-                    "group": "io.quarkus",
-                    "name": "quarkus-hibernate-orm",
-                    "version": "2.13.5.Final",
-                    "scope": "optional"
-                }
-            ],
-            "dependencies": []
-        }
   tasks:
     - name: test-app-health
       taskRef:
@@ -139,8 +74,6 @@ spec:
           value: $(params.EXPECTED_ANALYSIS)
         - name: SBOM_TYPE
           value: cyclonedx
-        - name: SBOM_CONTENTS
-          value: $(params.CYCLONEDX_SBOM)
         - name: PORT
           value: $(params.PORT)
       workspaces:
@@ -165,8 +98,6 @@ spec:
           value: $(params.EXPECTED_ANALYSIS)
         - name: SBOM_TYPE
           value: spdx
-        - name: SBOM_CONTENTS
-          value: $(params.SPDX_SBOM)
         - name: PORT
           value: $(params.PORT)
       workspaces:
