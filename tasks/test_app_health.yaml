@@ -14,9 +14,6 @@ spec:
     - default: "UP"
       name: EXPECTED_OUTPUT
       description: Expected health status of the application endpoint
-    - default: ""
-      name: PORT
-      description: Application endpoint Port
   results:
     - name: TEST_OUTPUT
       description: Test output
@@ -29,27 +26,19 @@ spec:
           value: $(params.NAMESPACE)
         - name: EXPECTED_OUTPUT
           value: $(params.EXPECTED_OUTPUT)
-        - name: PORT
-          value: $(params.PORT)
       script: |
         #!/usr/bin/env bash
 
-        ## Temporary workaround due to a bug mounting the credentials secret
-        HOST=exhortuu5e-trusted-content-tenant.apps.stone-prd-rh01.pg1f.p1.openshiftapps.com
-        PORT=80
-        
-        ## START - Original
-        # export KUBECONFIG=$(workspaces.cluster-credentials.path)/kubeconfig
+        export KUBECONFIG=$(workspaces.cluster-credentials.path)/kubeconfig
         
         # Get the route for the application endpoint
-        # COMPONENT_NAME=$(echo -n ${SNAPSHOT} | jq -r .components[0].name)
-        # ROUTE_NAME=$(oc get routes -l app.kubernetes.io/name="${COMPONENT_NAME}" -o name)
-        # HOST=$(oc get "${ROUTE_NAME}" -o jsonpath={.spec.host} -n "${NAMESPACE}")
-        # echo "Found target host ${HOST} for app ${APPLICATION_NAME}"
-        ## END - Original
+        COMPONENT_NAME=$(echo -n ${SNAPSHOT} | jq -r .components[0].name)
+        ROUTE_NAME=$(oc get routes -l app.kubernetes.io/name="${COMPONENT_NAME}" -o name)
+        HOST=$(oc get "${ROUTE_NAME}" -o jsonpath={.spec.host} -n "${NAMESPACE}")
+        echo "Found target host ${HOST} for app ${APPLICATION_NAME}"
 
         # Check the application endpoint
-        ENDPOINT_OUTPUT=$(curl -k http://${HOST}:${PORT}/q/health | jq -r .status)
+        ENDPOINT_OUTPUT=$(curl -k http://${HOST}/q/health | jq -r .status)
 
         echo -e "The endpoint outputs the following:\n ${ENDPOINT_OUTPUT}"
         echo -e "Expected endpoint output:\n ${EXPECTED_OUTPUT}"

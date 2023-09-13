@@ -28,10 +28,6 @@ spec:
       default: >
         {"summary":{"dependencies":{"scanned":0,"transitive":0},"vulnerabilities":{"direct":0,"total":0,"critical":0,"high":0,"medium":0,"low":0},"providerStatuses":[{"ok":true,"provider":"snyk","status":200,"message":"OK"}]},"dependencies":[]}
       type: string
-    - description: 'Application endpoint port'
-      name: PORT
-      default: ""
-      type: string
   tasks:
     - name: test-app-health
       taskRef:
@@ -50,8 +46,6 @@ spec:
           value: $(params.NAMESPACE)
         - name: EXPECTED_OUTPUT
           value: $(params.EXPECTED_STATUS)
-        - name: PORT
-          value: $(params.PORT)
       workspaces:
         - name: cluster-credentials
           workspace: cluster-credentials
@@ -74,8 +68,6 @@ spec:
           value: $(params.EXPECTED_ANALYSIS)
         - name: SBOM_TYPE
           value: cyclonedx
-        - name: PORT
-          value: $(params.PORT)
       workspaces:
         - name: cluster-credentials
           workspace: cluster-credentials
@@ -98,8 +90,6 @@ spec:
           value: $(params.EXPECTED_ANALYSIS)
         - name: SBOM_TYPE
           value: spdx
-        - name: PORT
-          value: $(params.PORT)
       workspaces:
         - name: cluster-credentials
           workspace: cluster-credentials

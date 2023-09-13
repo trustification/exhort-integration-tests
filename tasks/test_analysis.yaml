@@ -15,9 +15,6 @@ spec:
         {"summary":{"dependencies":{"scanned":0,"transitive":0},"vulnerabilities":{"direct":0,"total":0,"critical":0,"high":0,"medium":0,"low":0},"providerStatuses":[{"ok":true,"provider":"snyk","status":200,"message":"OK"}]},"dependencies":[]}
       name: EXPECTED_OUTPUT
       description: Expected analysis response of the analysis
-    - default: ""
-      name: PORT
-      description: Application endpoint Port
     - default: "cyclonedx"
       name: SBOM_TYPE
       description: SBOM type to use in the test (cyclonedx or spdx)
@@ -33,30 +30,23 @@ spec:
           value: $(params.NAMESPACE)
         - name: EXPECTED_OUTPUT
           value: $(params.EXPECTED_OUTPUT)
-        - name: PORT
-          value: $(params.PORT)
         - name: SBOM_TYPE
           value: $(params.SBOM_TYPE)
       script: |
         #!/usr/bin/env bash
 
-        ## Temporary workaround due to a bug mounting the credentials secret
-        HOST=exhortuu5e-trusted-content-tenant.apps.stone-prd-rh01.pg1f.p1.openshiftapps.com
-        PORT=80
-        
-        ## START - Original
-        # export KUBECONFIG=$(workspaces.cluster-credentials.path)/kubeconfig
+
+        export KUBECONFIG=$(workspaces.cluster-credentials.path)/kubeconfig
         
         # Get the route for the application endpoint
-        # COMPONENT_NAME=$(echo -n ${SNAPSHOT} | jq -r .components[0].name)
-        # ROUTE_NAME=$(oc get routes -l app.kubernetes.io/name="${COMPONENT_NAME}" -o name)
-        # HOST=$(oc get "${ROUTE_NAME}" -o jsonpath={.spec.host} -n "${NAMESPACE}")
-        # echo "Found target host ${HOST} for app ${APPLICATION_NAME}"
-        ## END - Original
+        COMPONENT_NAME=$(echo -n ${SNAPSHOT} | jq -r .components[0].name)
+        ROUTE_NAME=$(oc get routes -l app.kubernetes.io/name="${COMPONENT_NAME}" -o name)
+        HOST=$(oc get "${ROUTE_NAME}" -o jsonpath={.spec.host} -n "${NAMESPACE}")
+        echo "Found target host ${HOST} for app ${APPLICATION_NAME}"
 
         # Check the analysis endpoint
         if [[ "${SBOM_TYPE}" == "spdx" ]]; then
-          ENDPOINT_OUTPUT=$(curl -k http://${HOST}:${PORT}/api/v3/analysis -H 'Content-Type: application/vnd.'${SBOM_TYPE}'+json' -d '{
+          ENDPOINT_OUTPUT=$(curl -k http://${HOST}/api/v3/analysis -H 'Content-Type: application/vnd.'${SBOM_TYPE}'+json' -d '{
             "SPDXID" : "SPDXRef-DOCUMENT",
             "spdxVersion" : "SPDX-2.3",
             "creationInfo" : {
@@ -89,7 +79,7 @@ spec:
             } ]
           }')
         else
-          ENDPOINT_OUTPUT=$(curl -k http://${HOST}:${PORT}/api/v3/analysis -H 'Content-Type: application/vnd.'${SBOM_TYPE}'+json' -d '{
+          ENDPOINT_OUTPUT=$(curl -k http://${HOST}/api/v3/analysis -H 'Content-Type: application/vnd.'${SBOM_TYPE}'+json' -d '{
             "bomFormat": "CycloneDX",
             "specVersion": "1.4",
             "serialNumber": "urn:uuid:21e8d828-b07f-4fd3-bd14-0458f7188d40",
