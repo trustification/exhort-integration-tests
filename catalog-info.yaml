@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    backstage.io/kubernetes-id: exhort-integration-tests
+    github.com/project-slug: RHEcosystemAppEng/exhort-integration-tests
+    github.com/project-readme-path: README.md
+    backstage.io/view-url: https://github.com/RHEcosystemAppEng/exhort-integration-tests/blob/main/catalog-info.yaml
+    backstage.io/edit-url: https://github.com/RHEcosystemAppEng/exhort-integration-tests/blob/main/catalog-info.yaml
+    backstage.io/source-location: url:https://github.com/RHEcosystemAppEng/exhort-integration-tests
+    rhda/manifest-file-path: package.json
+    backstage.io/techdocs-ref: dir:README.md
+  name: exhort-integration-tests
+spec:
+  lifecycle: production
+  owner: ecosystem-appeng
+  type: service
