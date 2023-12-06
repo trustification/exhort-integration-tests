@@ -9,8 +9,10 @@ metadata:
     backstage.io/edit-url: https://github.com/RHEcosystemAppEng/exhort-integration-tests/blob/main/catalog-info.yaml
     backstage.io/source-location: url:https://github.com/RHEcosystemAppEng/exhort-integration-tests
     rhda/manifest-file-path: package.json
-    backstage.io/techdocs-ref: dir:README.md
+    backstage.io/techdocs-ref: url:https://github.com/RHEcosystemAppEng/exhort-integration-tests
   name: exhort-integration-tests
+  tags:
+    - rhda
 spec:
   lifecycle: production
   owner: ecosystem-appeng
