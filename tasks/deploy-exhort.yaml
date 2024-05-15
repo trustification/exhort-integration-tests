@@ -1,0 +1,65 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: deploy-exhort
+spec:
+  description: >-
+    Deploys Exhort and its dependencies
+  params:
+    - name: IMAGE
+      description: Exhort Image reference to deploy
+    - name: GIT_URL
+      description: Git repository
+    - name: GIT_REF
+      description: Git commit revision
+    - name: SECRET_REF
+      description: Kubeconfig Secret ref
+  steps:
+    - name: provision
+      image: registry.redhat.io/openshift4/ose-cli:4.13@sha256:73df37794ffff7de1101016c23dc623e4990810390ebdabcbbfa065214352c7c
+      env:
+        - name: KUBECONFIG_VALUE
+          valueFrom:
+            secretKeyRef:
+              name: "$(params.SECRET_REF)"
+              key: kubeconfig
+        - name: IMAGE
+          value: $(params.IMAGE)
+        - name: GIT_URL
+          value: $(params.GIT_URL)
+        - name: GIT_REF
+          value: $(params.GIT_REF)
+      script: |
+        #!/bin/bash
+        set -ex
+        dnf install -y -q git
+        git clone ${GIT_URL} project
+        cd project
+        git checkout ${GIT_REF}
+
+        cat <<< "$KUBECONFIG_VALUE" > /tmp/cfg
+        oc process --kubeconfig /tmp/cfg -p IMAGE=${IMAGE} -f deploy/it/template.yaml | oc create --kubeconfig /tmp/cfg -f - 
+
+        DESIRED_REPLICAS=1
+        RETRY_COUNT=3
+        RETRY_INTERVAL=60
+        deployment_ready=false
+
+        for ((i = 1; i <= $RETRY_COUNT; i++)); do
+            READY_REPLICAS=$(oc get --kubeconfig /tmp/cfg deployment exhort -o=jsonpath='{.status.readyReplicas}')
+            if [ "$READY_REPLICAS" -eq "$DESIRED_REPLICAS" ]; then
+                echo "Deployment is ready with $READY_REPLICAS replicas."
+                deployment_ready=true
+            else
+                echo "Attempt $i: Deployment is not ready or does not have the expected number of replicas."
+                if [ "$i" -lt "$RETRY_COUNT" ]; then
+                    echo "Retrying in $RETRY_INTERVAL seconds..."
+                    sleep $RETRY_INTERVAL
+                fi
+            fi
+        done
+
+        if [ "$deployment_ready" = false ]; then
+          echo "Maximum retry attempts reached. Deployment is still not ready."
+          exit 1
+        fi

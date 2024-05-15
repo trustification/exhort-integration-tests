@@ -1,0 +1,55 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: provision-env-with-ephemeral-namespace
+spec:
+  description: >-
+    Provision an ephemeral namespace for integration tests
+  results:
+    - name: secretRef
+      description:
+        SecretRef is the name of the secret with a SA token that has admin-like
+        (or whatever we set in the tier template) permissions in the namespace
+      type: string
+  params:
+    - name: pipelinerun-namespace
+    - name: pipelinerun-name
+    - name: pipelinerun-uid
+  steps:
+    - name: request-ephemeral-namespace
+      image: registry.redhat.io/openshift4/ose-cli:4.13@sha256:73df37794ffff7de1101016c23dc623e4990810390ebdabcbbfa065214352c7c
+      env:
+        - name: KONFLUXNAMESPACE
+          value: "$(params.pipelinerun-namespace)"
+        - name: PIPELINERUN_NAME
+          value: "$(params.pipelinerun-name)"
+        - name: PIPELINERUN_UID
+          value: "$(params.pipelinerun-uid)"
+      script: |
+        #!/bin/bash
+        set -ex
+        set -o pipefail
+
+        cat <<EOF > space_request.yaml
+        apiVersion: toolchain.dev.openshift.com/v1alpha1
+        kind: SpaceRequest
+        metadata:
+          generateName: task-spacerequest-
+          namespace: $KONFLUXNAMESPACE
+          ownerReferences:
+          - apiVersion: tekton.dev/v1
+            kind: PipelineRun
+            name: $PIPELINERUN_NAME
+            uid: $PIPELINERUN_UID
+        spec:
+          tierName: appstudio-env
+        EOF
+
+        SPACEREQUEST_NAME=$(oc create -f space_request.yaml -o=jsonpath='{.metadata.name}')
+
+        if oc wait spacerequests $SPACEREQUEST_NAME --for=condition=Ready --timeout=5m -n $KONFLUXNAMESPACE; then
+          secretRef=$(oc get spacerequests $SPACEREQUEST_NAME -o=jsonpath='{.status.namespaceAccess[0].secretRef}')
+          echo -n $secretRef | tee $(results.secretRef.path)
+        else
+          exit 1
+        fi

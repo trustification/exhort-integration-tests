@@ -1,0 +1,107 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: basic-it
+  namespace: trusted-content-tenant
+spec:
+  description: >-
+    Integration tests for Exhort and ONGuard
+  params:
+    - name: SNAPSHOT
+      description: A list of container images that should undergo testing
+      type: string
+    - name: API_NVD_KEY
+      description: NVD API Key to do the integration tests
+  tasks:
+    - name: exhort-refs
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/extract-refs.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+        - name: COMPONENT
+          value: exhort
+    - name: onguard-refs
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/extract-refs.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+        - name: COMPONENT
+          value: onguard
+    - name: provision-env
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/provision-env-with-ephemeral-namespace.yaml
+      params:
+        - name: pipelinerun-namespace
+          value: $(context.pipelineRun.namespace)
+        - name: pipelinerun-name
+          value: $(context.pipelineRun.name)
+        - name: pipelinerun-uid
+          value: $(context.pipelineRun.uid)
+      runAfter:
+        - exhort-refs
+        - onguard-refs
+    - name: deploy-exhort
+      runAfter: [provision-env]
+      params:
+        - name: IMAGE
+          value: $(tasks.exhort-refs.results.containerImage)
+        - name: GIT_URL
+          value: $(tasks.exhort-refs.results.url)
+        - name: GIT_REF
+          value: $(tasks.exhort-refs.results.revision)
+        - name: SECRET_REF
+          value: $(tasks.provision-env.results.secretRef)
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/deploy-exhort.yaml
+    - name: deploy-onguard
+      runAfter: [provision-env]
+      params:
+        - name: IMAGE
+          value: $(tasks.onguard-refs.results.containerImage)
+        - name: GIT_URL
+          value: $(tasks.onguard-refs.results.url)
+        - name: GIT_REF
+          value: $(tasks.onguard-refs.results.revision)
+        - name: API_NVD_KEY
+          value: $(params.API_NVD_KEY)
+        - name: SECRET_REF
+          value: $(tasks.provision-env.results.secretRef)
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/deploy-onguard.yaml
