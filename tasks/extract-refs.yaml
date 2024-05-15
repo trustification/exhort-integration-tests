@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: extract-refs
+spec:
+  description: >-
+    Extracts the references for ContainerImage gitUrl and gitRef from the given Snapshot and component.
+  params:
+    - name: SNAPSHOT
+      description: Expected output of the application endpoint
+    - name: COMPONENT
+      description: Namespace of the application under test
+  results:
+    - name: containerImage
+      description: Component's container image
+    - name: url
+      description: Component's git repository URL
+    - name: revision
+      description: Component's git repository commit ref
+  steps:
+    - image: registry.access.redhat.com/ubi9/ubi-minimal:9.4
+      env:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+      script: |
+        microdnf install -y jq
+        echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "$(params.COMPONENT)").containerImage' > $(results.containerImage.path)
+        echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "$(params.COMPONENT)").source.git.revision' > $(results.revision.path)
+        echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "$(params.COMPONENT)").source.git.url' > $(results.url.path)
