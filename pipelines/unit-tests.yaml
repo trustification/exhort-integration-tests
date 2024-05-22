@@ -1,0 +1,43 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: unit-tests
+  namespace: trusted-content-tenant
+spec:
+  description: >-
+    Unit tests for Exhort and ONGuard that requires a Redis database
+  params:
+    - name: SNAPSHOT
+      description: A list of container images that should undergo testing
+      type: string
+  tasks:
+    - name: extract-refs
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/extract-refs.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
+        - name: COMPONENT
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['appstudio.openshift.io/component']
+    - name: run-unit-tests
+      taskRef:
+        resolver: git
+        params:
+          - name: url
+            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+          - name: revision
+            value: main
+          - name: pathInRepo
+            value: tasks/run-unit-tests.yaml
+      params:
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)

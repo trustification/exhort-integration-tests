@@ -1,0 +1,57 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: verify-openjdk-redis
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: image-build
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  description: >-
+    OpenJDK 21 task with a Redis sidecar. The task requests 4Gi of memory with a limit of 6Gi
+  params:
+  - name: SNAPSHOT
+    description: Snapshot context data of the current build
+  - name: JDK_IMAGE
+    description: Reference of the image buildah will produce.
+    default: registry.redhat.io/ubi9/openjdk-21:1.18
+  - name: REDIS_IMAGE
+    description: The location of the buildah builder image.
+    default: docker.io/redis/redis-stack:7.2.0-v7
+  - name: SCRIPT
+    description: The script to execute in the jdk image
+    default: |
+      mvn -B verify
+  steps:
+  - name: clone-git
+    image: registry.access.redhat.com/ubi9/ubi-minimal:9.4
+    env:
+      - name: SNAPSHOT
+        value: $(params.SNAPSHOT)
+      - name: KONFLUX_COMPONENT_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.labels['appstudio.openshift.io/component']
+    script: |
+      export GIT_URL=$(jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.url' <<< "$SNAPSHOT")
+      export GIT_REVISION=$(jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.revision' <<< "$SNAPSHOT")
+      microdnf install --assumeyes git
+      git clone $GIT_URL source
+      cd source
+      git checkout $GIT_REVISION
+  - name: run-tests
+    image: $(params.JDK_IMAGE)
+    script: |
+      cd source
+      $(params.SCRIPT)
+    computeResources:
+      requests:
+        memory: 4Gi
+      limits:
+        memory: 6Gi
+  sidecars:
+    - image: $(params.REDIS_IMAGE)
+      name: redis-stack

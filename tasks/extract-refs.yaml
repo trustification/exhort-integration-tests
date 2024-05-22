@@ -24,6 +24,7 @@ spec:
           value: $(params.SNAPSHOT)
       script: |
         microdnf install -y jq
+        echo '$(params.COMPONENT)'
         echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "$(params.COMPONENT)").containerImage' > $(results.containerImage.path)
         echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "$(params.COMPONENT)").source.git.revision' > $(results.revision.path)
         echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "$(params.COMPONENT)").source.git.url' > $(results.url.path)
