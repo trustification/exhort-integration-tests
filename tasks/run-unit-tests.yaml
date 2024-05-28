@@ -64,7 +64,7 @@ spec:
         echo "secret file not found, using default configuration"
       fi
       EXTRA_ARGS=" -Dquarkus.redis.hosts=redis://localhost:6379/"
-      if [ $KONFLUX_COMPONENT_NAME == "onguard" ]; then
+      if [ "$KONFLUX_COMPONENT_NAME" = "onguard" ]; then
         echo "onguard uses a native build"
         EXTRA_ARGS+=" -Pnative"
       else
