@@ -17,14 +17,30 @@ spec:
       description: Component's git repository URL
     - name: revision
       description: Component's git repository commit ref
+    - name: component
+      description: Component's name
   steps:
     - image: registry.access.redhat.com/ubi9/ubi-minimal:9.4
       env:
         - name: SNAPSHOT
           value: $(params.SNAPSHOT)
+        - name: COMPONENT
+          value: $(params.COMPONENT)
+        - name: DEFAULT_COMPONENT
+          valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['appstudio.openshift.io/component']
+
       script: |
         microdnf install -y jq
-        echo '$(params.COMPONENT)'
-        echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "$(params.COMPONENT)").containerImage' > $(results.containerImage.path)
-        echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "$(params.COMPONENT)").source.git.revision' > $(results.revision.path)
-        echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "$(params.COMPONENT)").source.git.url' > $(results.url.path)
+        if [ "${COMPONENT}" == "default" ]; then
+          component=${DEFAULT_COMPONENT}
+        else
+          component=${COMPONENT}
+        fi
+
+        echo extracting snapshot context for component: $component
+        echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "'${component}'").containerImage' > $(results.containerImage.path)
+        echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "'${component}'").source.git.revision' > $(results.revision.path)
+        echo '$(params.SNAPSHOT)' | jq -r '.components[] | select(.name == "'${component}'").source.git.url' > $(results.url.path)
+        echo $component > $(results.component.path)

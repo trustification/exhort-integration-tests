@@ -2,13 +2,7 @@
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: verify-openjdk-redis
-  labels:
-    app.kubernetes.io/version: "0.1"
-  annotations:
-    tekton.dev/pipelines.minVersion: "0.12.1"
-    tekton.dev/tags: image-build
-    tekton.dev/platforms: "linux/amd64"
+  name: run-unit-tests
 spec:
   description: >-
     OpenJDK 21 task with a Redis sidecar. The task requests 4Gi of memory with a limit of 6Gi
@@ -25,6 +19,9 @@ spec:
     description: The script to execute in the jdk image
     default: |
       mvn -B verify
+  - name: GITHUB_MVN_CREDS_SECRET
+    description: Secret containing the Github username and token for GitHub Maven repository
+    default: gh-credentials
   steps:
   - name: clone-git
     image: registry.access.redhat.com/ubi9/ubi-minimal:9.4
@@ -36,17 +33,44 @@ spec:
           fieldRef:
             fieldPath: metadata.labels['appstudio.openshift.io/component']
     script: |
+      microdnf install --assumeyes git jq
+      echo `jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.url' <<< "$SNAPSHOT"`
       export GIT_URL=$(jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.url' <<< "$SNAPSHOT")
       export GIT_REVISION=$(jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.revision' <<< "$SNAPSHOT")
-      microdnf install --assumeyes git
-      git clone $GIT_URL source
-      cd source
+      git clone $GIT_URL /workspace
+      cd /workspace
       git checkout $GIT_REVISION
+      chown -R 185:root /workspace
   - name: run-tests
     image: $(params.JDK_IMAGE)
+    volumeMounts:
+      - name: gh-mvn-creds
+        mountPath: /secret
+        readOnly: true
     script: |
-      cd source
-      $(params.SCRIPT)
+      cd /workspace
+      if [ -f /secret/gh-creds.txt ]; then
+        . /secret/gh-creds.txt
+        # Create the XML block to be inserted as a single line with \n for newlines
+        XML_BLOCK="\
+        <server>\n\
+          <id>github</id>\n\
+          <username>${GH_USER}</username>\n\
+          <password>${GH_TOKEN}</password>\n\
+        </server>"
+        sed -i '/<!-- ### configured servers ### -->/a\'"$XML_BLOCK"'' $HOME/.m2/settings.xml
+        echo "found credentials secret, added Maven server configuration"
+      else
+        echo "secret file not found, using default configuration"
+      fi
+      EXTRA_ARGS=" -Dquarkus.redis.hosts=redis://localhost:6379/"
+      if [ $KONFLUX_COMPONENT_NAME == "onguard" ]; then
+        echo "onguard uses a native build"
+        EXTRA_ARGS+=" -Pnative"
+      else
+        echo "exhort doesn't use a native build"
+      fi
+      $(params.SCRIPT) $EXTRA_ARGS
     computeResources:
       requests:
         memory: 4Gi
@@ -55,3 +79,7 @@ spec:
   sidecars:
     - image: $(params.REDIS_IMAGE)
       name: redis-stack
+  volumes:
+    - name: gh-mvn-creds
+      secret:
+        secretName: $(params.GITHUB_MVN_CREDS_SECRET)
