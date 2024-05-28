@@ -15,10 +15,6 @@ spec:
   - name: REDIS_IMAGE
     description: The location of the buildah builder image.
     default: docker.io/redis/redis-stack:7.2.0-v7
-  - name: SCRIPT
-    description: The script to execute in the jdk image
-    default: |
-      mvn -B verify
   - name: GITHUB_MVN_CREDS_SECRET
     description: Secret containing the Github username and token for GitHub Maven repository
     default: gh-credentials
@@ -70,7 +66,8 @@ spec:
       else
         echo "exhort doesn't use a native build"
       fi
-      $(params.SCRIPT) $EXTRA_ARGS
+      set -x
+      mvn -B verify $EXTRA_ARGS
     computeResources:
       requests:
         memory: 4Gi
