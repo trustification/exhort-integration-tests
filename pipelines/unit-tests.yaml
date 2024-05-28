@@ -25,9 +25,7 @@ spec:
         - name: SNAPSHOT
           value: $(params.SNAPSHOT)
         - name: COMPONENT
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.labels['appstudio.openshift.io/component']
+          value: default
     - name: run-unit-tests
       taskRef:
         resolver: git
@@ -41,3 +39,5 @@ spec:
       params:
         - name: SNAPSHOT
           value: $(params.SNAPSHOT)
+        - name: GITHUB_MVN_CREDS_SECRET
+          value: gh-credentials

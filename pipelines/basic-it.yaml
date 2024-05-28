@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: basic-it
-  namespace: trusted-content-tenant
 spec:
   description: >-
     Integration tests for Exhort and ONGuard
