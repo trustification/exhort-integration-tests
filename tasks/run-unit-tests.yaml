@@ -5,7 +5,7 @@ metadata:
   name: run-unit-tests
 spec:
   description: >-
-    OpenJDK 21 task with a Redis sidecar. The task requests 4Gi of memory with a limit of 6Gi
+    OpenJDK task with a Redis sidecar. The task requests 4Gi of memory with a limit of 6Gi
   params:
   - name: SNAPSHOT
     description: Snapshot context data of the current build
@@ -29,8 +29,9 @@ spec:
           fieldRef:
             fieldPath: metadata.labels['appstudio.openshift.io/component']
     script: |
-      echo "$SNAPSHOT"
       microdnf install --assumeyes git jq
+      echo -e "Using Snapshot:\n ${SNAPSHOT}"
+      echo -e "Target component:\n ${KONFLUX_COMPONENT_NAME}"
       echo `jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.url' <<< "$SNAPSHOT"`
       export GIT_URL=$(jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.url' <<< "$SNAPSHOT")
       export GIT_REVISION=$(jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.revision' <<< "$SNAPSHOT")
