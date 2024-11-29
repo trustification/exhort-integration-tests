@@ -11,7 +11,7 @@ spec:
     description: Snapshot context data of the current build
   - name: JDK_IMAGE
     description: Reference of the image buildah will produce.
-    default: registry.redhat.io/ubi9/openjdk-21:1.18
+    default: registry.redhat.io/ubi8/openjdk-17:1.21
   - name: REDIS_IMAGE
     description: The location of the buildah builder image.
     default: docker.io/redis/redis-stack:7.2.0-v7
@@ -20,7 +20,7 @@ spec:
     default: gh-credentials
   steps:
   - name: clone-git
-    image: registry.access.redhat.com/ubi9/ubi-minimal:9.4
+    image: registry.redhat.io/ubi9/ubi-minimal:9.5
     env:
       - name: SNAPSHOT
         value: $(params.SNAPSHOT)
@@ -29,6 +29,7 @@ spec:
           fieldRef:
             fieldPath: metadata.labels['appstudio.openshift.io/component']
     script: |
+      echo "$SNAPSHOT"
       microdnf install --assumeyes git jq
       echo `jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.url' <<< "$SNAPSHOT"`
       export GIT_URL=$(jq -r --arg component_name "$KONFLUX_COMPONENT_NAME" '.components[] | select(.name == $component_name) | .source.git.url' <<< "$SNAPSHOT")
