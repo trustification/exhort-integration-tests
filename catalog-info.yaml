@@ -3,13 +3,13 @@ kind: Component
 metadata:
   annotations:
     backstage.io/kubernetes-id: exhort-integration-tests
-    github.com/project-slug: RHEcosystemAppEng/exhort-integration-tests
+    github.com/project-slug: trustification/exhort-integration-tests
     github.com/project-readme-path: README.md
-    backstage.io/view-url: https://github.com/RHEcosystemAppEng/exhort-integration-tests/blob/main/catalog-info.yaml
-    backstage.io/edit-url: https://github.com/RHEcosystemAppEng/exhort-integration-tests/blob/main/catalog-info.yaml
-    backstage.io/source-location: url:https://github.com/RHEcosystemAppEng/exhort-integration-tests
+    backstage.io/view-url: https://github.com/trustification/exhort-integration-tests/blob/main/catalog-info.yaml
+    backstage.io/edit-url: https://github.com/trustification/exhort-integration-tests/blob/main/catalog-info.yaml
+    backstage.io/source-location: url:https://github.com/trustification/exhort-integration-tests
     rhda/manifest-file-path: package.json
-    backstage.io/techdocs-ref: url:https://github.com/RHEcosystemAppEng/exhort-integration-tests
+    backstage.io/techdocs-ref: url:https://github.com/trustification/exhort-integration-tests
   name: exhort-integration-tests
   tags:
     - rhda

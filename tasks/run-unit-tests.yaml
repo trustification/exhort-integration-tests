@@ -11,7 +11,7 @@ spec:
     description: Snapshot context data of the current build
   - name: JDK_IMAGE
     description: Reference of the image buildah will produce.
-    default: registry.redhat.io/ubi8/openjdk-17:1.21
+    default: registry.redhat.io/ubi9/openjdk-21:1.22
   - name: REDIS_IMAGE
     description: The location of the buildah builder image.
     default: docker.io/redis/redis-stack:7.2.0-v7
