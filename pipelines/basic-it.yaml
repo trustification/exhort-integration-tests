@@ -17,7 +17,7 @@ spec:
         resolver: git
         params:
           - name: url
-            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+            value: https://github.com/trustification/exhort-integration-tests
           - name: revision
             value: main
           - name: pathInRepo
@@ -32,7 +32,7 @@ spec:
         resolver: git
         params:
           - name: url
-            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+            value: https://github.com/trustification/exhort-integration-tests
           - name: revision
             value: main
           - name: pathInRepo
@@ -47,7 +47,7 @@ spec:
         resolver: git
         params:
           - name: url
-            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+            value: https://github.com/trustification/exhort-integration-tests
           - name: revision
             value: main
           - name: pathInRepo
@@ -77,7 +77,7 @@ spec:
         resolver: git
         params:
           - name: url
-            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+            value: https://github.com/trustification/exhort-integration-tests
           - name: revision
             value: main
           - name: pathInRepo
@@ -99,7 +99,7 @@ spec:
         resolver: git
         params:
           - name: url
-            value: https://github.com/RHEcosystemAppEng/exhort-integration-tests
+            value: https://github.com/trustification/exhort-integration-tests
           - name: revision
             value: main
           - name: pathInRepo
