@@ -111,6 +111,12 @@ jobs:
           mkdir cli
           tar -xzf artifact/cli.tgz -C cli --strip-components=1
 
+      - name: List files
+        run: |
+          ls -la
+          ls -la integration-tests
+          ls -la integration-tests/shared-scripts
+
       - name: Setup Runtimes
         run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
 
