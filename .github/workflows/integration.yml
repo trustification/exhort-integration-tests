@@ -92,6 +92,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout integration tests repo
+        uses: actions/checkout@v4
+        with:
+          repository: trustification/exhort-integration-tests
+          path: integration-tests
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Download Built Artifact
         uses: actions/download-artifact@v4
         with:
@@ -105,7 +112,7 @@ jobs:
           tar -xzf artifact/cli.tgz -C cli --strip-components=1
 
       - name: Setup Runtimes
-        run: ./shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
+        run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
 
       - name: Run Integration Tests
-        run: ./shared-scripts/run-test.sh ${{ inputs.language }} cli ${{ matrix.runtime }}
+        run: ./integration-tests/shared-scripts/run-test.sh ${{ inputs.language }} cli ${{ matrix.runtime }}
