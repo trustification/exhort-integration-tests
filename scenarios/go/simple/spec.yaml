@@ -1,0 +1,3 @@
+title: Simple Go Scenario
+description: Test a simple Go project with a few dependencies.
+expect_success: true 

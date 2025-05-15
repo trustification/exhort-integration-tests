@@ -1,0 +1,111 @@
+name: Shared Integration Workflow
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        required: true
+        type: string
+      repo-url:
+        required: true
+        type: string
+      commit-sha:
+        required: true
+        type: string
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone calling repo
+        run: |
+          git clone https://github.com/${{ inputs.repo-url }} sdk
+          cd sdk
+          git checkout ${{ inputs.commit-sha }}
+
+      - name: Setup Node.js
+        if: inputs.language == 'javascript'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://npm.pkg.github.com'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create .npmrc
+        run: |
+          echo "@trustification:registry=https://npm.pkg.github.com" >> .npmrc
+
+      - name: Setup Java
+        if: inputs.language == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build CLI
+        id: build
+        run: |
+          cd sdk
+          if [[ "${{ inputs.language }}" == "javascript" ]]; then
+            npm ci
+            npm run compile
+            PKG=$(npm pack)
+            mv "$PKG" ../cli.tgz
+          elif [[ "${{ inputs.language }}" == "java" ]]; then
+            ./mvnw package -DskipTests
+            cp target/*.jar ../cli.jar
+          fi
+
+      - name: Set Artifact Name
+        id: set-output
+        run: |
+          echo "name=cli-${{ inputs.language }}" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-${{ inputs.language }}
+          path: cli.tgz  # or cli.jar
+
+  integration-tests:
+    needs: run-tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        runtime:
+          - none
+          - java-maven
+          - java-gradle-groovy
+          - java-gradle-kotlin
+          - npm
+          - yarn-classic
+          - yarn-berry
+          - pnpm
+          - go-1.20
+          - go-latest
+          - python-3.10-pip
+          - python-3.12-pip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Built Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cli-${{ inputs.language }}
+          path: artifact
+
+      - name: Extract JS Artifact
+        if: inputs.language == 'javascript'
+        run: |
+          mkdir cli
+          tar -xzf artifact/cli.tgz -C cli --strip-components=1
+
+      - name: Setup Runtimes
+        run: ./shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
+
+      - name: Run Integration Tests
+        run: ./shared-scripts/run-test.sh ${{ inputs.language }} cli ${{ matrix.runtime }}

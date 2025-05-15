@@ -1,0 +1,3 @@
+title: Simple Yarn Classic Scenario
+description: Test a simple Yarn Classic project with a few dependencies.
+expect_success: true 

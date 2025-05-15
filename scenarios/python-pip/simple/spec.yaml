@@ -1,0 +1,3 @@
+title: Simple Python Pip Scenario
+description: Test a simple Python project with a few dependencies using pip.
+expect_success: true 

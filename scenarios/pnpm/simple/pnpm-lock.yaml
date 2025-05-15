@@ -1,0 +1,23 @@
+lockfileVersion: 5.4
+
+importers:
+  .:
+    specifiers:
+      lodash: ^4.17.21
+      axios: ^1.3.4
+      express: ^4.18.2
+    dependencies:
+      lodash: 4.17.21
+      axios: 1.3.4
+      express: 4.18.2
+
+packages:
+  /lodash/4.17.21:
+    resolution: {integrity: sha512-v2kDEUA5Qb+...}
+    dev: false
+  /axios/1.3.4:
+    resolution: {integrity: sha512-...}
+    dev: false
+  /express/4.18.2:
+    resolution: {integrity: sha512-...}
+    dev: false 
