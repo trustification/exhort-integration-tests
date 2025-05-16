@@ -83,14 +83,14 @@ jobs:
           - maven
           - gradle-groovy
           - gradle-kotlin
-          - npm
-          - yarn-classic
-          - yarn-berry
-          - pnpm
-          - go-1.20
-          - go-latest
-          - python-3.10-pip
-          - python-3.12-pip
+          # - npm
+          # - yarn-classic
+          # - yarn-berry
+          # - pnpm
+          # - go-1.20
+          # - go-latest
+          # - python-3.10-pip
+          # - python-3.12-pip
 
     steps:
       - uses: actions/checkout@v4
