@@ -105,17 +105,11 @@ jobs:
           name: cli-${{ inputs.language }}
           path: artifact
 
-      - name: Extract JS Artifact
-        if: inputs.language == 'javascript'
-        run: |
-          mkdir cli
-          tar -xzf artifact/cli.tgz -C cli --strip-components=1
-
       - name: Run Integration Tests - No Runtime
-        run: ./integration-tests/shared-scripts/run-tests-no-runtime.sh ${{ inputs.language }} cli ${{ matrix.runtime }}
+        run: ./integration-tests/shared-scripts/run-tests-no-runtime.sh ${{ inputs.language }} . ${{ matrix.runtime }}
 
       - name: Setup Runtimes
         run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
 
       - name: Run Integration Tests
-        run: ./integration-tests/shared-scripts/run-tests.sh ${{ inputs.language }} cli ${{ matrix.runtime }}
+        run: ./integration-tests/shared-scripts/run-tests.sh ${{ inputs.language }} . ${{ matrix.runtime }}

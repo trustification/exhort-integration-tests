@@ -8,7 +8,8 @@ LANGUAGE="$1"
 CLI_DIR="$2"
 RUNTIME="$3"
 
-SCENARIOS_DIR="scenarios/$RUNTIME"
+# Use the correct path for scenarios
+SCENARIOS_DIR="$(dirname "$0")/../scenarios/$RUNTIME"
 
 # Get manifest file name
 MANIFEST=$(get_manifest_file "$RUNTIME")
