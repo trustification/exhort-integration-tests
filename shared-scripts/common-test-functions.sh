@@ -29,6 +29,58 @@ get_manifest_file() {
   esac
 }
 
+get_package_manager() {
+  local RUNTIME="$1"
+  case "$RUNTIME" in
+    npm)
+      echo "npm"
+      ;;
+    yarn-classic|yarn-berry)
+      echo "yarn"
+      ;;
+    pnpm)
+      echo "pnpm"
+      ;;
+    maven)
+      echo "mvn"
+      ;;
+    gradle-groovy|gradle-kotlin)
+      echo "gradle"
+      ;;
+    go*|go)
+      echo "go"
+      ;;
+    python-*|python-pip)
+      echo "pip"
+      ;;
+    *)
+      echo "Unknown or unsupported runtime: $RUNTIME" >&2
+      exit 1
+      ;;
+  esac
+}
+
+get_scenario_base_dir() {
+  local RUNTIME="$1"
+  case "$RUNTIME" in
+    gradle-groovy|gradle-kotlin)
+      echo $RUNTIME
+      ;;
+    yarn-classic|yarn-berry)
+      echo $RUNTIME
+      ;;
+    *)
+      echo $(get_package_manager $RUNTIME)
+      ;;
+  esac
+}
+
+get_env_var_name() {
+  local RUNTIME="$1"
+  local PACKAGE_MANAGER=$(get_package_manager $RUNTIME)
+  echo "EXHORT_$(echo $PACKAGE_MANAGER | tr '[:lower:]' '[:upper:]')_PATH"
+}
+
 # Function to get commands based on language
 get_commands() {
   local LANGUAGE="$1"

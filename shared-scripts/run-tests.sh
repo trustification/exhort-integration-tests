@@ -12,7 +12,7 @@ CLI_DIR="$2"
 RUNTIME="$3"
 
 # Use the correct path for scenarios
-SCENARIOS_DIR="$SCRIPT_DIR/../scenarios/$RUNTIME"
+SCENARIOS_DIR="$SCRIPT_DIR/../scenarios/$(get_scenario_base_dir $RUNTIME)"
 
 # Get manifest file name
 MANIFEST=$(get_manifest_file "$RUNTIME")
@@ -22,6 +22,7 @@ if [ ! -d "$SCENARIOS_DIR" ]; then
   exit 0
 fi
 
+# Run all scenarios
 for SCENARIO in "$SCENARIOS_DIR"/*; do
   if [ -d "$SCENARIO" ] && [ -f "$SCENARIO/spec.yaml" ]; then
     echo "---"
