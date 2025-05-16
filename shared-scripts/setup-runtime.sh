@@ -44,27 +44,25 @@ install_go() {
     local version=$1
     case "$OS" in
         linux)
-            # Remove any existing Go installation
-            sudo rm -rf /usr/local/go
-            # Download and install Go
-            wget -q "https://go.dev/dl/go${version}.linux-amd64.tar.gz"
-            sudo tar -C /usr/local -xzf "go${version}.linux-amd64.tar.gz"
-            rm "go${version}.linux-amd64.tar.gz"
-            # Add Go to PATH
-            echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-            export PATH=$PATH:/usr/local/go/bin
+            # Install base Go using apt
+            sudo apt-get update
+            sudo apt-get install -y golang-go
             ;;
         macos)
-            brew install go@${version#go}
+            # Install base Go using brew
+            brew install go
             ;;
         windows)
-            if [[ "$version" == "1.20.14" ]]; then
-                choco install golang --version=1.20.14 -y
-            else
-                choco install golang -y
-            fi
+            # Install base Go using chocolatey
+            choco install golang -y
             ;;
     esac
+
+    # Install specific version if needed
+    if [[ "$version" != "latest" ]]; then
+        go install "golang.org/dl/go${version#go}@latest"
+        "go${version#go}" download
+    fi
 }
 
 case "$RUNTIME" in
@@ -111,11 +109,7 @@ case "$RUNTIME" in
     ;;
   "go-latest")
     echo "Installing latest Go..."
-    case "$OS" in
-        linux)      install_go "1.22.1";;
-        macos)      brew install go;;
-        windows)    choco install golang -y;;
-    esac
+    install_go "latest"
     ;;
   "python-3.10-pip")
     echo "Installing Python 3.10 and pip..."
