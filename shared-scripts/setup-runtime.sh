@@ -49,6 +49,8 @@ case "$RUNTIME" in
         macos)      install_package maven;;
         windows)    choco install maven -y;;
     esac
+    echo "Installed Maven version:"
+    mvn -v
     ;;
   "gradle-groovy"|"gradle-kotlin")
     echo "Installing Gradle..."
@@ -57,6 +59,8 @@ case "$RUNTIME" in
         macos)      install_package gradle;;
         windows)    choco install gradle -y;;
     esac
+    echo "Installed Gradle version:"
+    gradle -v
     ;;
   "npm")
     echo "Installing npm..."
@@ -65,19 +69,29 @@ case "$RUNTIME" in
         macos)      install_package node;;
         windows)    choco install nodejs -y;;
     esac
+    echo "Installed npm version:" 
+    npm -v
+    echo "Installed node version:"
+    node -v
     ;;
   "yarn-classic")
     echo "Installing Yarn Classic..."
     npm install -g yarn@1
+    echo "Installed yarn version:"
+    yarn -v
     ;;
   "yarn-berry")
     echo "Installing Yarn Berry..."
     corepack enable
     corepack prepare yarn@stable --activate
+    echo "Installed yarn version:"
+    yarn -v
     ;;
   "pnpm")
     echo "Installing pnpm..."
     npm install -g pnpm
+    echo "Installed pnpm version:"
+    pnpm -v
     ;;
   "go-1.20")
     echo "Installing Go 1.20..."
@@ -89,6 +103,8 @@ case "$RUNTIME" in
   "go-latest")
     echo "Installing latest Go..."
     install_package golang-go
+    echo "Installed Go version:"
+    go version
     ;;
   "python-3.10-pip")
     echo "Installing Python 3.10 and pip..."
@@ -97,6 +113,10 @@ case "$RUNTIME" in
         macos)      install_package python@3.10;;
         windows)    install_package python3.10;;
     esac
+    echo "Installed Python version:"
+    python --version
+    echo "Installed pip version:"
+    pip --version
     ;;
   "python-3.12-pip")
     echo "Installing Python 3.12 and pip..."
@@ -105,6 +125,10 @@ case "$RUNTIME" in
         macos)      install_package python@3.12;;
         windows)    install_package python3.12;;
     esac
+    echo "Installed Python version:"
+    python --version
+    echo "Installed pip version:"
+    pip --version
     ;;
   "none")
     echo "No additional runtime setup required."
