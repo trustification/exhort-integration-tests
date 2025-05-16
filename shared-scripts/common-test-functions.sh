@@ -90,10 +90,12 @@ get_commands() {
 
   case "$LANGUAGE" in
     "javascript")
-      echo "npx --yes file:$CLI_DIR/cli.tgz component $SCENARIO/$MANIFEST"
-      echo "npx --yes file:$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST"
-      echo "npx --yes file:$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST --summary"
-      echo "npx --yes file:$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST --html"
+      # Convert CLI_DIR to absolute path
+      CLI_DIR="$(cd "$CLI_DIR" && pwd)"
+      echo "npx --yes file://$CLI_DIR/cli.tgz component $SCENARIO/$MANIFEST"
+      echo "npx --yes file://$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST"
+      echo "npx --yes file://$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST --summary"
+      echo "npx --yes file://$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST --html"
       ;;
     "java")
       echo "java -jar $CLI_DIR/cli.jar component $SCENARIO/$MANIFEST"
@@ -108,15 +110,15 @@ get_commands() {
   esac
 }
 
-# Function to parse spec.yaml
-parse_spec_yaml() {
+# Function to parse spec properties
+parse_spec() {
   local SCENARIO="$1"
-  python3 -c '
-import sys, yaml
-with open(sys.argv[1]) as f:
-  d = yaml.safe_load(f)
-  for k in ["title", "description", "expect_success"]:
-    v = d.get(k, "")
-    print(f"{k.upper()}=\"{v}\"")
-' "$SCENARIO/spec.yaml"
+  while IFS='=' read -r key value; do
+    # Skip comments and empty lines
+    [[ $key =~ ^#.*$ ]] && continue
+    [[ -z $key ]] && continue
+    # Remove any quotes from the value
+    value=$(echo "$value" | tr -d '"'"'")
+    echo "${key^^}=\"$value\""
+  done < "$SCENARIO/spec.properties"
 } 

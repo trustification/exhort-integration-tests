@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone calling repo
+        shell: bash
         run: |
           git clone https://github.com/${{ inputs.repo-url }} sdk
           cd sdk
@@ -33,6 +34,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create .npmrc
+        shell: bash
         run: |
           echo "@trustification:registry=https://npm.pkg.github.com" >> .npmrc
 
@@ -45,6 +47,7 @@ jobs:
 
       - name: Build CLI
         id: build
+        shell: bash
         run: |
           cd sdk
           if [[ "${{ inputs.language }}" == "javascript" ]]; then
@@ -59,6 +62,7 @@ jobs:
 
       - name: Set Artifact Name
         id: set-output
+        shell: bash
         run: |
           echo "name=cli-${{ inputs.language }}" >> $GITHUB_OUTPUT
 
@@ -106,15 +110,13 @@ jobs:
           path: artifact
 
       - name: Run Integration Tests - No Runtime
+        shell: bash
         run: ./integration-tests/shared-scripts/run-tests-no-runtime.sh ${{ inputs.language }} artifact ${{ matrix.runtime }}
 
       - name: Setup Runtimes
+        shell: bash
         run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
 
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
-
       - name: Run Integration Tests
+        shell: bash
         run: ./integration-tests/shared-scripts/run-tests.sh ${{ inputs.language }} artifact ${{ matrix.runtime }}

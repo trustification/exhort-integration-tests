@@ -24,10 +24,10 @@ fi
 
 # Run all scenarios
 for SCENARIO in "$SCENARIOS_DIR"/*; do
-  if [ -d "$SCENARIO" ] && [ -f "$SCENARIO/spec.yaml" ]; then
+  if [ -d "$SCENARIO" ] && [ -f "$SCENARIO/spec.properties" ]; then
     echo "---"
-    # Parse YAML using common function
-    eval $(parse_spec_yaml "$SCENARIO")
+    # Parse spec using common function
+    eval $(parse_spec "$SCENARIO")
 
     echo "Scenario: $TITLE"
     echo "Description: $DESCRIPTION"

@@ -30,6 +30,9 @@ if [ ! -d "$SCENARIO" ]; then
 fi
 
 echo "---"
+# Parse spec using common function
+eval $(parse_spec "$SCENARIO")
+
 echo "Scenario: No runtime available"
 echo "Description: It fails when no runtime is available"
 echo "Manifest: $SCENARIO/$MANIFEST"
