@@ -119,6 +119,6 @@ parse_spec() {
     [[ -z $key ]] && continue
     # Remove any quotes from the value
     value=$(echo "$value" | tr -d '"'"'")
-    echo "${key^^}=\"$value\""
+    echo "$(echo "$key" | tr '[:lower:]' '[:upper:]')=\"$value\""
   done < "$SCENARIO/spec.properties"
 } 

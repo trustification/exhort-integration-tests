@@ -39,6 +39,34 @@ install_package() {
     esac
 }
 
+# Function to install Go using official method
+install_go() {
+    local version=$1
+    case "$OS" in
+        linux)
+            # Remove any existing Go installation
+            sudo rm -rf /usr/local/go
+            # Download and install Go
+            wget -q "https://go.dev/dl/go${version}.linux-amd64.tar.gz"
+            sudo tar -C /usr/local -xzf "go${version}.linux-amd64.tar.gz"
+            rm "go${version}.linux-amd64.tar.gz"
+            # Add Go to PATH
+            echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+            export PATH=$PATH:/usr/local/go/bin
+            ;;
+        macos)
+            brew install go@${version#go}
+            ;;
+        windows)
+            if [[ "$version" == "1.20.14" ]]; then
+                choco install golang --version=1.20.14 -y
+            else
+                choco install golang -y
+            fi
+            ;;
+    esac
+}
+
 case "$RUNTIME" in
   "maven")
     echo "Installing Maven..."
@@ -79,25 +107,14 @@ case "$RUNTIME" in
     ;;
   "go-1.20")
     echo "Installing Go 1.20..."
-    case "$OS" in
-        linux)
-            install_package golang-1.20-go
-            export PATH="/usr/lib/go-1.20/bin:$PATH"
-            ;;
-        macos)
-            brew install go@1.20
-            ;;
-        windows)
-            winget install GoLang.Go.1.20
-            ;;
-    esac
+    install_go "1.20.14"
     ;;
   "go-latest")
     echo "Installing latest Go..."
     case "$OS" in
-        linux)      install_package golang-go;;
-        macos)      install_package go;;
-        windows)    winget install GoLang.Go;;
+        linux)      install_go "1.22.1";;
+        macos)      brew install go;;
+        windows)    choco install golang -y;;
     esac
     ;;
   "python-3.10-pip")
