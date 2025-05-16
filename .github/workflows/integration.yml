@@ -76,10 +76,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         runtime:
-          - none
-          - java-maven
-          - java-gradle-groovy
-          - java-gradle-kotlin
+          - maven
+          - gradle-groovy
+          - gradle-kotlin
           - npm
           - yarn-classic
           - yarn-berry
@@ -112,14 +111,11 @@ jobs:
           mkdir cli
           tar -xzf artifact/cli.tgz -C cli --strip-components=1
 
-      - name: List files
-        run: |
-          ls -la
-          ls -la integration-tests
-          ls -la integration-tests/shared-scripts
+      - name: Run Integration Tests - No Runtime
+        run: ./integration-tests/shared-scripts/run-tests-no-runtime.sh ${{ inputs.language }} cli ${{ matrix.runtime }}
 
       - name: Setup Runtimes
         run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
 
       - name: Run Integration Tests
-        run: ./integration-tests/shared-scripts/run-test.sh ${{ inputs.language }} cli ${{ matrix.runtime }}
+        run: ./integration-tests/shared-scripts/run-tests.sh ${{ inputs.language }} cli ${{ matrix.runtime }}

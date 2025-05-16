@@ -40,7 +40,7 @@ install_package() {
 }
 
 case "$RUNTIME" in
-  "java-maven")
+  "maven")
     echo "Installing Maven..."
     case "$OS" in
         linux)      install_package maven;;
@@ -48,7 +48,7 @@ case "$RUNTIME" in
         windows)    choco install maven -y;;
     esac
     ;;
-  "java-gradle-groovy"|"java-gradle-kotlin")
+  "gradle-groovy"|"gradle-kotlin")
     echo "Installing Gradle..."
     case "$OS" in
         linux)      install_package gradle;;
@@ -70,7 +70,8 @@ case "$RUNTIME" in
     ;;
   "yarn-berry")
     echo "Installing Yarn Berry..."
-    npm install -g yarn@berry
+    corepack enable
+    corepack prepare yarn@stable --activate
     ;;
   "pnpm")
     echo "Installing pnpm..."
