@@ -15,54 +15,30 @@ esac
 
 # Function to install packages based on OS
 install_package() {
-    local package=$1
+    local packages=("$@")
     case "$OS" in
         linux)
             sudo apt-get update
-            sudo apt-get install -y "$package"
+            sudo apt-get install -y "${packages[@]}"
             ;;
         macos)
-            brew install "$package"
+            brew install "${packages[@]}"
             ;;
         windows)
-            if [[ "$package" == *"go"* ]]; then
-                # Use winget for Go on Windows
-                winget install GoLang.Go
-            elif [[ "$package" == *"python"* ]]; then
-                # Use winget for Python on Windows
-                winget install Python.Python.3.10
-            else
-                # Use chocolatey for other packages
-                choco install "$package" -y
-            fi
+            for package in "${packages[@]}"; do
+                if [[ "$package" == *"go"* ]]; then
+                    # Use chocolatey for Go on Windows
+                    choco install golang --version=1.20.14 -y
+                elif [[ "$package" == *"python"* ]]; then
+                    # Use chocolatey for Python on Windows
+                    choco install python --version=3.10 -y
+                else
+                    # Use chocolatey for other packages
+                    choco install "$package" -y
+                fi
+            done
             ;;
     esac
-}
-
-# Function to install Go using official method
-install_go() {
-    local version=$1
-    case "$OS" in
-        linux)
-            # Install base Go using apt
-            sudo apt-get update
-            sudo apt-get install -y golang-go
-            ;;
-        macos)
-            # Install base Go using brew
-            brew install go
-            ;;
-        windows)
-            # Install base Go using chocolatey
-            choco install golang -y
-            ;;
-    esac
-
-    # Install specific version if needed
-    if [[ "$version" != "latest" ]]; then
-        go install "golang.org/dl/go${version#go}@latest"
-        "go${version#go}" download
-    fi
 }
 
 case "$RUNTIME" in
@@ -105,26 +81,29 @@ case "$RUNTIME" in
     ;;
   "go-1.20")
     echo "Installing Go 1.20..."
-    install_go "1.20.14"
+    install_package golang-go
+    # Install specific version if needed
+    go install "golang.org/dl/go1.20.14@latest"
+    "go1.20.14" download
     ;;
   "go-latest")
     echo "Installing latest Go..."
-    install_go "latest"
+    install_package golang-go
     ;;
   "python-3.10-pip")
     echo "Installing Python 3.10 and pip..."
     case "$OS" in
         linux)      install_package python3.10 python3-pip;;
-        macos)      brew install python@3.10;;
-        windows)    winget install Python.Python.3.10;;
+        macos)      install_package python@3.10;;
+        windows)    install_package python3.10;;
     esac
     ;;
   "python-3.12-pip")
     echo "Installing Python 3.12 and pip..."
     case "$OS" in
         linux)      install_package python3.12 python3-pip;;
-        macos)      brew install python@3.12;;
-        windows)    winget install Python.Python.3.12;;
+        macos)      install_package python@3.12;;
+        windows)    install_package python3.12;;
     esac
     ;;
   "none")
