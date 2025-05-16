@@ -90,12 +90,16 @@ get_commands() {
 
   case "$LANGUAGE" in
     "javascript")
-      # Convert CLI_DIR to absolute path
+      # Convert CLI_DIR to absolute path and normalize for Windows
       CLI_DIR="$(cd "$CLI_DIR" && pwd)"
-      echo "npx --yes file://$CLI_DIR/cli.tgz component $SCENARIO/$MANIFEST"
-      echo "npx --yes file://$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST"
-      echo "npx --yes file://$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST --summary"
-      echo "npx --yes file://$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST --html"
+      if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+        # For Windows, use forward slashes and remove drive letter
+        CLI_DIR=$(echo "$CLI_DIR" | sed 's/^[A-Za-z]://' | sed 's/\\/\//g')
+      fi
+      echo "npx --yes file:///$CLI_DIR/cli.tgz component $SCENARIO/$MANIFEST"
+      echo "npx --yes file:///$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST"
+      echo "npx --yes file:///$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST --summary"
+      echo "npx --yes file:///$CLI_DIR/cli.tgz stack $SCENARIO/$MANIFEST --html"
       ;;
     "java")
       echo "java -jar $CLI_DIR/cli.jar component $SCENARIO/$MANIFEST"
