@@ -106,10 +106,10 @@ jobs:
           path: artifact
 
       - name: Run Integration Tests - No Runtime
-        run: ./integration-tests/shared-scripts/run-tests-no-runtime.sh ${{ inputs.language }} . ${{ matrix.runtime }}
+        run: ./integration-tests/shared-scripts/run-tests-no-runtime.sh ${{ inputs.language }} artifact ${{ matrix.runtime }}
 
       - name: Setup Runtimes
         run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
 
       - name: Run Integration Tests
-        run: ./integration-tests/shared-scripts/run-tests.sh ${{ inputs.language }} . ${{ matrix.runtime }}
+        run: ./integration-tests/shared-scripts/run-tests.sh ${{ inputs.language }} artifact ${{ matrix.runtime }}
