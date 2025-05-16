@@ -1,15 +1,18 @@
 #!/bin/bash
 set -e
 
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # Source common functions
-source "$(dirname "$0")/common-test-functions.sh"
+source "$SCRIPT_DIR/common-test-functions.sh"
 
 LANGUAGE="$1"
 CLI_DIR="$2"
 RUNTIME="$3"
 
 # Use the correct path for scenarios
-SCENARIOS_DIR="$(dirname "$0")/../scenarios/$RUNTIME"
+SCENARIOS_DIR="$SCRIPT_DIR/../scenarios/$RUNTIME"
 
 # Get manifest file name
 MANIFEST=$(get_manifest_file "$RUNTIME")

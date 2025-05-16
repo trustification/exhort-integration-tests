@@ -111,5 +111,10 @@ jobs:
       - name: Setup Runtimes
         run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
 
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
       - name: Run Integration Tests
         run: ./integration-tests/shared-scripts/run-tests.sh ${{ inputs.language }} artifact ${{ matrix.runtime }}
