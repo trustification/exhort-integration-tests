@@ -83,14 +83,14 @@ jobs:
           - maven
           - gradle-groovy
           - gradle-kotlin
-          # - npm
-          # - yarn-classic
-          # - yarn-berry
-          # - pnpm
-          # - go-1.20
-          # - go-latest
-          # - python-3.10-pip
-          # - python-3.12-pip
+          - npm
+          - yarn-classic
+          - yarn-berry
+          - pnpm
+          - go-1.20
+          - go-latest
+          - python-3.10-pip
+          - python-3.12-pip
 
     steps:
       - uses: actions/checkout@v4
@@ -116,6 +116,10 @@ jobs:
       - name: Setup Runtimes
         shell: bash
         run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
+
+      - name: Print Runtimes
+        shell: bash
+        run: ./integration-tests/shared-scripts/print-runtime.sh
 
       - name: Run Integration Tests
         shell: bash

@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 RUNTIME="$1"
 
@@ -14,133 +13,99 @@ case "$(uname -s)" in
     *)          echo "Unsupported OS"; exit 1;;
 esac
 
-# Function to get the latest version of a package
-get_latest_version() {
-    local package="$1"
-    case "$package" in
-        openjdk) echo "21";;
-        maven) echo "3.9.9";;
-        gradle) echo "8.14";;
-        *) echo "Unsupported package: $package"; exit 1;;
-    esac
-}
-
-
 # Function to install packages based on OS
 install_package() {
-    local package="$1"
-    local version=get_latest_version "${package}"
+    local packages=("$@")
     case "$OS" in
         linux)
             sudo apt-get update
-            sudo apt-get remove --purge -y "${package}"
-            sudo apt-get install -y "${package}-${version}"
+            sudo apt-get install -y "${packages[@]}"
             ;;
         macos)
-            brew uninstall "${package}"
-            brew install "${package}@${version}"
+            brew install "${packages[@]}"
             ;;
         windows)
-            choco uninstall "${package}" -y
-            choco install "${package}" --version="${version}" -y
+            for package in "${packages[@]}"; do
+                if [[ "$package" == *"go"* ]]; then
+                    # Use chocolatey for Go on Windows
+                    choco install golang --version=1.20.14 -y
+                elif [[ "$package" == *"python"* ]]; then
+                    # Use chocolatey for Python on Windows
+                    choco install python --version=3.10 -y
+                else
+                    # Use chocolatey for other packages
+                    choco install "$package" -y
+                fi
+            done
             ;;
     esac
 }
 
 case "$RUNTIME" in
-  "maven")
-    echo "Installing Maven..."
-    install_package openjdk
-    install_package maven;;
-    esac
-    echo "Installed Java version:"
-    java -version
-    echo "Installed Maven version:"
-    mvn -v
+  "yarn-berry")
+    echo "Installing Yarn Berry..."
+    # Enable corepack and prepare Yarn Berry
+    npm uninstall -g yarn
+    corepack enable
+    corepack prepare yarn@4.9.1 --activate
+    echo "Installed yarn version:"
+    yarn -v
     ;;
-  "gradle-groovy"|"gradle-kotlin")
-    echo "Installing Gradle..."
-    install_package openjdk gradle;;
-    esac
-    echo "Installed Java version:"
-    java -version
-    echo "Installed Gradle version:"
-    gradle -v
+  "pnpm")
+    echo "Installing pnpm..."
+    corepack enable
+    corepack prepare pnpm@latest-10 --activate
+    echo "Installed pnpm version:"
+    pnpm -v
     ;;
-  # "npm")
-  #   echo "Installing npm..."
-  #   case "$OS" in
-  #       linux)      install_package npm;;
-  #       macos)      install_package node;;
-  #       windows)    choco install nodejs -y;;
-  #   esac
-  #   echo "Installed npm version:" 
-  #   npm -v
-  #   echo "Installed node version:"
-  #   node -v
-  #   ;;
-  # "yarn-classic")
-  #   echo "Installing Yarn Classic..."
-  #   npm install -g yarn@1
-  #   echo "Installed yarn version:"
-  #   yarn -v
-  #   ;;
-  # "yarn-berry")
-  #   echo "Installing Yarn Berry..."
-  #   corepack enable
-  #   corepack prepare yarn@stable --activate
-  #   echo "Installed yarn version:"
-  #   yarn -v
-  #   ;;
-  # "pnpm")
-  #   echo "Installing pnpm..."
-  #   npm install -g pnpm
-  #   echo "Installed pnpm version:"
-  #   pnpm -v
-  #   ;;
-  # "go-1.20")
-  #   echo "Installing Go 1.20..."
-  #   install_package golang-go
-  #   # Install specific version if needed
-  #   go install "golang.org/dl/go1.20.14@latest"
-  #   "go1.20.14" download
-  #   ;;
-  # "go-latest")
-  #   echo "Installing latest Go..."
-  #   install_package golang-go
-  #   echo "Installed Go version:"
-  #   go version
-  #   ;;
-  # "python-3.10-pip")
-  #   echo "Installing Python 3.10 and pip..."
-  #   case "$OS" in
-  #       linux)      install_package python3.10 python3-pip;;
-  #       macos)      install_package python@3.10;;
-  #       windows)    install_package python3.10;;
-  #   esac
-  #   echo "Installed Python version:"
-  #   python --version
-  #   echo "Installed pip version:"
-  #   pip --version
-  #   ;;
-  # "python-3.12-pip")
-  #   echo "Installing Python 3.12 and pip..."
-  #   case "$OS" in
-  #       linux)      install_package python3.12 python3-pip;;
-  #       macos)      install_package python@3.12;;
-  #       windows)    install_package python3.12;;
-  #   esac
-  #   echo "Installed Python version:"
-  #   python --version
-  #   echo "Installed pip version:"
-  #   pip --version
-  #   ;;
+  "go-1.20")
+    echo "Installing Go 1.20..."
+    case "$OS" in
+      macos)
+        # Use Homebrew for Go on macOS
+        brew install go@1.20
+        # Set up Go 1.20 as default (keg-only formula)
+        export PATH="/opt/homebrew/opt/go@1.20/bin:$PATH"
+        export GOROOT="/opt/homebrew/opt/go@1.20/libexec"
+        # Persist environment variables for subsequent steps
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        echo "GOROOT=$GOROOT" >> $GITHUB_ENV
+        ;;
+      *)
+        echo "Go is already installed on $OS"
+        ;;
+    esac
+    
+    echo "Installed Go version:"
+    go version
+    ;;
+  "go-latest")
+    echo "Installing latest Go..."
+    case "$OS" in
+      macos)
+        brew install go@1.24
+        export PATH="/opt/homebrew/opt/go@1.24/bin:$PATH"
+        export GOROOT="/opt/homebrew/opt/go@1.24/libexec"
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        echo "GOROOT=$GOROOT" >> $GITHUB_ENV
+        ;;
+      *)
+        echo "Go is already installed on $OS"
+        ;;
+    esac
+    echo "Installed Go version:"
+    go version
+    ;;
+  "python-3.10-pip")
+    echo "TODO: Install Python 3.10 and pip..."
+    ;;
+  
   "none")
     echo "No additional runtime setup required."
     ;;
   *)
-    echo "Unknown runtime: $RUNTIME"
-    exit 1
+    echo "Nothing to install for: $RUNTIME"
+    exit 0
     ;;
 esac
 
