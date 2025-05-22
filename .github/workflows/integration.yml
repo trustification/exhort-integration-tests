@@ -91,6 +91,7 @@ jobs:
           - go-latest
           - python-3.10-pip
           - python-3.12-pip
+          - syft
 
     steps:
       - name: Configure Git for Windows paths
@@ -122,6 +123,13 @@ jobs:
       - name: Setup Runtimes
         shell: bash
         run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
+
+      - name: Setup Python 3.10
+        if: matrix.runtime == 'python-3.10-pip'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          check-latest: true
 
       - name: Print Runtimes
         shell: bash

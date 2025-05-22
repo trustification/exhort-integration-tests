@@ -22,6 +22,10 @@ get_manifest_file() {
     python-*|python-pip)
       echo "requirements.txt"
       ;;
+    syft)
+      echo "TODO: Implement OCI CLI support for Syft"
+      exit 0
+      ;;
     *)
       echo "Unknown or unsupported runtime: $RUNTIME" >&2
       exit 1
@@ -52,6 +56,10 @@ get_package_manager() {
       ;;
     python-*|python-pip)
       echo "pip"
+      ;;
+    syft)
+      echo "TODO: Implement OCI CLI support for Syft"
+      exit 0
       ;;
     *)
       echo "Unknown or unsupported runtime: $RUNTIME" >&2

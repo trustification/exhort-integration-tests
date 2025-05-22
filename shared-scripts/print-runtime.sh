@@ -26,5 +26,6 @@ check_version "pnpm" "pnpm"
 check_version "go" "Go"
 check_version "python" "Python"
 check_version "pip" "pip"
+check_version "syft" "Syft"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo

@@ -96,10 +96,25 @@ case "$RUNTIME" in
     echo "Installed Go version:"
     go version
     ;;
-  "python-3.10-pip")
-    echo "TODO: Install Python 3.10 and pip..."
+  "syft")
+    echo "Installing Syft..."
+    case "$OS" in
+      windows)
+        # Install Syft on Windows using the official installation script
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$(pwd)"
+        # Add current directory to PATH for this session
+        export PATH="$(pwd):$PATH"
+        # Persist PATH for subsequent steps
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        ;;
+      *)
+        # Install Syft on Unix-like systems using the official installation script
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+        ;;
+    esac
+    echo "Installed Syft version:"
+    syft version
     ;;
-  
   "none")
     echo "No additional runtime setup required."
     ;;
