@@ -93,6 +93,12 @@ jobs:
           - python-3.12-pip
 
     steps:
+      - name: Configure Git for Windows paths
+        if: runner.os == 'Windows'
+        run: |
+          git config --global core.protectNTFS false
+          git config --global core.quotepath false
+
       - uses: actions/checkout@v4
 
       - name: Checkout integration tests repo
