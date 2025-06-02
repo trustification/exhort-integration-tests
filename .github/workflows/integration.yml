@@ -116,9 +116,22 @@ jobs:
           name: cli-${{ inputs.language }}
           path: artifact
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          check-latest: true
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
       - name: Run Integration Tests - No Runtime
         shell: bash
-        run: ./integration-tests/shared-scripts/run-tests-no-runtime.sh ${{ inputs.language }} artifact ${{ matrix.runtime }}
+        run: |
+          cd integration-tests
+          python shared-scripts/run_tests_no_runtime.py ${{ inputs.language }} artifact ${{ matrix.runtime }}
 
       - name: Setup Runtimes
         shell: bash
@@ -137,4 +150,6 @@ jobs:
 
       - name: Run Integration Tests
         shell: bash
-        run: ./integration-tests/shared-scripts/run-tests.sh ${{ inputs.language }} artifact ${{ matrix.runtime }}
+        run: |
+          cd integration-tests
+          python shared-scripts/run_tests.py ${{ inputs.language }} artifact ${{ matrix.runtime }}
