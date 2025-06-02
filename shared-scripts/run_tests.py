@@ -14,45 +14,67 @@ from common_test_functions import (
     get_commands
 )
 
-def validate_component_analysis(output: Dict[str, Any], spec: Dict[str, Any]) -> bool:
-    """Validate component analysis results against spec.yaml expectations."""
-    expected = spec['component_analysis']
+def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_type: str) -> bool:
+    """Validate analysis results against spec.yaml expectations."""
+    print(f"Output structure: {json.dumps(output, indent=2)}")
+    print(f"Expected structure: {json.dumps(spec[analysis_type], indent=2)}")
+    
+    expected = spec[analysis_type]
     actual = output
     
     # Validate scanned metrics
     scanned_fields = ['total', 'direct', 'transitive']
     for field in scanned_fields:
         if actual['scanned'][field] != expected['scanned'][field]:
-            print(f"❌ Scanned {field} mismatch: expected {expected['scanned'][field]}, got {actual['scanned'][field]}")
+            print(f"❌ {analysis_type} scanned {field} mismatch: expected {expected['scanned'][field]}, got {actual['scanned'][field]}")
             return False
     
-    # Validate TPA provider metrics
-    tpa_fields = ['total', 'direct', 'transitive', 'dependencies']
-    for field in tpa_fields:
-        if actual['tpa_provider'][field] != expected['tpa_provider'][field]:
-            print(f"❌ TPA {field} mismatch: expected {expected['tpa_provider'][field]}, got {actual['tpa_provider'][field]}")
+    # Validate all providers and their sources
+    for provider_name, provider_spec in expected.items():
+        if provider_name == 'scanned':  # Skip scanned metrics as they're handled above
+            continue
+            
+        if provider_name not in actual['providers']:
+            print(f"❌ {analysis_type} missing provider: {provider_name}")
             return False
-    
-    return True
-
-def validate_stack_analysis(output: Dict[str, Any], spec: Dict[str, Any]) -> bool:
-    """Validate stack analysis results against spec.yaml expectations."""
-    expected = spec['stack_analysis']
-    actual = output
-    
-    # Validate scanned metrics
-    scanned_fields = ['total', 'direct', 'transitive']
-    for field in scanned_fields:
-        if actual['scanned'][field] != expected['scanned'][field]:
-            print(f"❌ Stack scanned {field} mismatch: expected {expected['scanned'][field]}, got {actual['scanned'][field]}")
-            return False
-    
-    # Validate TPA provider metrics
-    tpa_fields = ['total', 'direct', 'transitive', 'dependencies']
-    for field in tpa_fields:
-        if actual['tpa_provider'][field] != expected['tpa_provider'][field]:
-            print(f"❌ Stack TPA {field} mismatch: expected {expected['tpa_provider'][field]}, got {actual['tpa_provider'][field]}")
-            return False
+            
+        provider = actual['providers'][provider_name]
+        
+        # Handle both single source and multiple sources
+        if isinstance(provider_spec, dict) and any(isinstance(v, dict) for v in provider_spec.values()):
+            # Multiple sources case
+            for source_name, source_spec in provider_spec.items():
+                if source_name not in provider['sources']:
+                    print(f"❌ {analysis_type} provider {provider_name} missing source: {source_name}")
+                    return False
+                    
+                source = provider['sources'][source_name]
+                if 'summary' not in source:
+                    print(f"❌ {analysis_type} provider {provider_name} source {source_name} missing summary")
+                    return False
+                    
+                # Validate all fields in the source summary
+                for field, expected_value in source_spec.items():
+                    if field not in source['summary']:
+                        print(f"❌ {analysis_type} provider {provider_name} source {source_name} missing field: {field}")
+                        return False
+                    if source['summary'][field] != expected_value:
+                        print(f"❌ {analysis_type} provider {provider_name} source {source_name} {field} mismatch: expected {expected_value}, got {source['summary'][field]}")
+                        return False
+        else:
+            # Single source case (backward compatibility)
+            if 'summary' not in provider:
+                print(f"❌ {analysis_type} provider {provider_name} missing summary")
+                return False
+                
+            # Validate all fields in the provider summary
+            for field, expected_value in provider_spec.items():
+                if field not in provider['summary']:
+                    print(f"❌ {analysis_type} provider {provider_name} missing field: {field}")
+                    return False
+                if provider['summary'][field] != expected_value:
+                    print(f"❌ {analysis_type} provider {provider_name} {field} mismatch: expected {expected_value}, got {provider['summary'][field]}")
+                    return False
     
     return True
 
@@ -72,7 +94,8 @@ def run_scenario(language: str, cli_dir: str, scenario_dir: Path, runtime: str) 
     print(f"Manifest: {scenario_dir}/{get_manifest_file(runtime)}")
     print(f"Expect success: {spec['expect_success']}")
     
-    commands = get_commands(language, cli_dir, str(scenario_dir), get_manifest_file(runtime))
+    manifest_file = get_manifest_file(runtime)
+    commands = get_commands(language, cli_dir, str(scenario_dir), manifest_file)
     
     for cmd in commands:
         print(f"Executing: {cmd}")
@@ -90,13 +113,13 @@ def run_scenario(language: str, cli_dir: str, scenario_dir: Path, runtime: str) 
                         # Determine which validation to run based on the command
                         if "component" in cmd:
                             print("Validating component analysis...")
-                            if not validate_component_analysis(output, spec):
+                            if not validate_analysis(output, spec, 'component_analysis'):
                                 print("❌ Component analysis validation failed")
                                 return False
                             print("✅ Component analysis validation passed")
                         elif "stack" in cmd and not any(flag in cmd for flag in ["--summary", "--html"]):
                             print("Validating stack analysis...")
-                            if not validate_stack_analysis(output, spec):
+                            if not validate_analysis(output, spec, 'stack_analysis'):
                                 print("❌ Stack analysis validation failed")
                                 return False
                             print("✅ Stack analysis validation passed")

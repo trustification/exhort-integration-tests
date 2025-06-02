@@ -89,7 +89,7 @@ def get_commands(language: str, cli_dir: str, scenario_dir: str, manifest: str) 
     
     if language == "javascript":
         # Convert CLI_DIR to absolute path and normalize for Windows
-        cli_dir = str(Path(cli_dir).resolve())
+        cli_dir = str(Path(cli_dir).absolute())
         if platform.system() == "Windows":
             # For Windows, convert to proper drive letter format
             if cli_dir.startswith("/") and len(cli_dir) > 2 and cli_dir[2] == "/":
