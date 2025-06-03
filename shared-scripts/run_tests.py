@@ -78,6 +78,19 @@ def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_typ
     
     return True
 
+def validate_html_output(output: str) -> bool:
+    """Basic validation of HTML output."""
+    if not output.strip():
+        print("❌ HTML output is empty")
+        return False
+    
+    if not output.lower().startswith("<!doctype html") and not output.lower().startswith("<html"):
+        print("❌ Output doesn't appear to be valid HTML")
+        return False
+    
+    print("✅ HTML output appears valid")
+    return True
+
 def run_scenario(language: str, cli_dir: str, scenario_dir: Path, runtime: str) -> bool:
     """Run a single scenario and validate its results."""
     spec_file = scenario_dir / "spec.yaml"
@@ -105,6 +118,12 @@ def run_scenario(language: str, cli_dir: str, scenario_dir: Path, runtime: str) 
             if spec['expect_success']:
                 if result.returncode == 0:
                     print("✅ Command succeeded as expected")
+                    
+                    # Handle HTML output
+                    if "--html" in cmd:
+                        if not validate_html_output(result.stdout):
+                            return False
+                        continue
                     
                     # Parse the command output as JSON
                     try:
