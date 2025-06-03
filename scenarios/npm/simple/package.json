@@ -4,9 +4,9 @@
   "description": "A simple npm project for integration testing.",
   "main": "index.js",
   "dependencies": {
-    "lodash": "^4.17.21",
-    "axios": "^1.3.4",
-    "express": "^4.18.2",
+    "lodash": "4.17.21",
+    "axios": "1.3.4",
+    "express": "4.18.2",
     "@babel/core": "7.13.1"
   }
 } 

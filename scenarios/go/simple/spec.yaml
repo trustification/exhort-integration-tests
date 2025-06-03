@@ -22,8 +22,8 @@ stack_analysis:
       unscanned: 0
 component_analysis:
   scanned:
-    total: 3
-    direct: 3
+    total: 4
+    direct: 4
     transitive: 0
   tpa:
     osv:
