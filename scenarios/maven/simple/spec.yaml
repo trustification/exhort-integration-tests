@@ -1,0 +1,40 @@
+# simple scenario specification
+title: Simple Maven Scenario
+description: Test a simple Maven project with a few dependencies.
+expect_success: true
+stack_analysis:
+  scanned:
+    total: 45
+    direct: 5
+    transitive: 40
+  tpa:
+    osv:
+      direct: 5
+      transitive: 2
+      total: 7
+      dependencies: 3
+      critical: 4
+      high: 3
+      medium: 0
+      low: 0
+      remediations: 0
+      recommendations: 1
+      unscanned: 0
+component_analysis:
+  scanned:
+    total: 5
+    direct: 5
+    transitive: 0
+  tpa:
+    osv:
+      direct: 5
+      transitive: 0
+      total: 5
+      dependencies: 1
+      critical: 3
+      high: 2
+      medium: 0
+      low: 0
+      remediations: 0
+      recommendations: 1
+      unscanned: 0 

@@ -1,0 +1,41 @@
+# simple scenario specification
+title: Simple Gradle Groovy Scenario
+description: Test a simple Gradle (Groovy DSL) project with a few dependencies.
+expect_success: true
+stack_analysis:
+  scanned:
+    total: 247
+    direct: 12
+    transitive: 235
+  tpa:
+    osv:
+      direct: 7
+      transitive: 22
+      total: 29
+      dependencies: 18
+      critical: 5
+      high: 7
+      medium: 16
+      low: 1
+      remediations: 9
+      recommendations: 10
+      unscanned: 0
+component_analysis:
+  scanned:
+    total: 12
+    direct: 12
+    transitive: 0
+  tpa:
+    osv:
+      direct: 8
+      transitive: 0
+      total: 8
+      dependencies: 3
+      critical: 3
+      high: 4
+      medium: 1
+      low: 0
+      remediations: 2
+      recommendations: 10
+      unscanned: 0
+

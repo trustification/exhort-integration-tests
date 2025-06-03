@@ -100,6 +100,13 @@ jobs:
           git config --global core.protectNTFS false
           git config --global core.quotepath false
 
+      - name: Set Windows Console Encoding
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          chcp 65001
+
       - uses: actions/checkout@v4
 
       - name: Checkout integration tests repo
@@ -114,7 +121,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: cli-${{ inputs.language }}
-          path: artifact
+          path: integration-tests/artifact
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -129,13 +136,18 @@ jobs:
 
       - name: Run Integration Tests - No Runtime
         shell: bash
+        working-directory: integration-tests
+        env:
+          PYTHONIOENCODING: utf-8
+          PYTHONUNBUFFERED: 1
         run: |
-          cd integration-tests
-          python shared-scripts/run_tests_no_runtime.py ${{ inputs.language }} artifact ${{ matrix.runtime }}
+          set -x
+          python -u shared-scripts/run_tests_no_runtime.py ${{ inputs.language }} artifact ${{ matrix.runtime }}
 
       - name: Setup Runtimes
         shell: bash
-        run: ./integration-tests/shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
+        working-directory: integration-tests
+        run: ./shared-scripts/setup-runtime.sh ${{ matrix.runtime }}
 
       - name: Setup Python 3.10
         if: matrix.runtime == 'python-3.10-pip'
@@ -146,12 +158,16 @@ jobs:
 
       - name: Print Runtimes
         shell: bash
-        run: ./integration-tests/shared-scripts/print-runtime.sh
+        working-directory: integration-tests
+        run: ./shared-scripts/print-runtime.sh
 
       - name: Run Integration Tests
         shell: bash
+        working-directory: integration-tests
         env:
           EXHORT_DEV_MODE: true
+          PYTHONIOENCODING: utf-8
+          PYTHONUNBUFFERED: 1
         run: |
-          cd integration-tests
-          python shared-scripts/run_tests.py ${{ inputs.language }} artifact ${{ matrix.runtime }}
+          set -x
+          python -u shared-scripts/run_tests.py ${{ inputs.language }} artifact ${{ matrix.runtime }}

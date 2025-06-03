@@ -1,0 +1,22 @@
+## Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+*.pyzwz
+
+## Javascript
+node_modules/
+
+## Python
+venv/
+
+## Go
+go.work
+
+## Maven
+target/
