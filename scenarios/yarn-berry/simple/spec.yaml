@@ -7,14 +7,14 @@ stack_analysis:
     total: 118
     direct: 4
     transitive: 114
-  tpa
+  tpa:
     osv:
       direct: 4
       transitive: 5
       total: 9
-      dependencies: 7
-      critical: 0
-      high: 4
+      dependencies: 8
+      critical: 1
+      high: 3
       medium: 5
       low: 0
       remediations: 0
@@ -30,9 +30,9 @@ component_analysis:
       direct: 4
       transitive: 0
       total: 4
-      dependencies: 2
-      critical: 0
-      high: 1
+      dependencies: 3
+      critical: 1
+      high: 0
       medium: 3
       low: 0
       remediations: 0
