@@ -4,9 +4,9 @@ description: Test a simple Node.js project using pnpm with a few dependencies.
 expect_success: true
 stack_analysis:
   scanned:
-    total: 118
+    total: 119
     direct: 4
-    transitive: 114
+    transitive: 115
   tpa:
     osv:
       direct: 4
