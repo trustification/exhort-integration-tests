@@ -117,7 +117,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: trustification/exhort-integration-tests
-          ref: sdk-common # TODO: remove this once the integration tests are updated to use the latest version of the SDK
+          ref: main
           path: integration-tests
           token: ${{ secrets.GITHUB_TOKEN }}
 
