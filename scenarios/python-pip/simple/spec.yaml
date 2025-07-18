@@ -1,0 +1,40 @@
+# simple scenario specification
+title: Simple Python pip Scenario
+description: Test a simple Python project using pip with a few dependencies.
+expect_success: true
+stack_analysis:
+  scanned:
+    total: 12
+    direct: 3
+    transitive: 9
+  tpa:
+    osv:
+      direct: 3
+      transitive: 0
+      total: 3
+      dependencies: 2
+      critical: 1
+      high: 0
+      medium: 2
+      low: 0
+      remediations: 0
+      recommendations: 0
+      unscanned: 0
+component_analysis:
+  scanned:
+    total: 3
+    direct: 3
+    transitive: 0
+  tpa:
+    osv:
+      direct: 3
+      transitive: 0
+      total: 3
+      dependencies: 2
+      critical: 1
+      high: 0
+      medium: 2
+      low: 0
+      remediations: 0
+      recommendations: 0
+      unscanned: 0 
