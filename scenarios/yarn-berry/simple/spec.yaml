@@ -4,9 +4,9 @@ description: Test a simple Node.js project using Yarn Berry (v2+) with a few dep
 expect_success: true
 stack_analysis:
   scanned:
-    total: 119
+    total: 118
     direct: 4
-    transitive: 115
+    transitive: 114
   tpa:
     osv:
       direct: 4

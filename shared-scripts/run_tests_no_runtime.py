@@ -42,7 +42,29 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
         # Set the environment variable to an invalid path
         env_var_name = get_env_var_name(runtime)
         original_env = os.environ.get(env_var_name)
+        
+        # Store original environment variables that will be modified
+        env_vars_to_restore = {}
+        
+        # Set the primary environment variable to INVALID
         os.environ[env_var_name] = "INVALID"
+        env_vars_to_restore[env_var_name] = original_env
+        
+        # For Python runtime, set ALL Python-related environment variables to INVALID
+        # Based on exhort-javascript-api documentation: EXHORT_PIP_PATH, EXHORT_PIP3_PATH, 
+        # EXHORT_PYTHON_PATH, EXHORT_PYTHON3_PATH
+        if runtime.startswith('python'):
+            python_env_vars = [
+                "EXHORT_PIP_PATH",
+                "EXHORT_PIP3_PATH", 
+                "EXHORT_PYTHON_PATH",
+                "EXHORT_PYTHON3_PATH"
+            ]
+            
+            for env_var in python_env_vars:
+                if env_var not in env_vars_to_restore:  # Don't override if already set above
+                    env_vars_to_restore[env_var] = os.environ.get(env_var)
+                os.environ[env_var] = "INVALID"
         
         try:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -54,11 +76,13 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
             else:
                 print("✅ Command failed as expected (no runtime available)")
         finally:
-            # Restore original environment variable
-            if original_env is not None:
-                os.environ[env_var_name] = original_env
-            else:
-                del os.environ[env_var_name]
+            # Restore all original environment variables
+            for env_var, original_value in env_vars_to_restore.items():
+                if original_value is not None:
+                    os.environ[env_var] = original_value
+                else:
+                    if env_var in os.environ:
+                        del os.environ[env_var]
     
     print("---")
     return True
