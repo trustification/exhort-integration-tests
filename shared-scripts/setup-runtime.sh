@@ -58,15 +58,15 @@ case "$RUNTIME" in
     echo "Installed pnpm version:"
     pnpm -v
     ;;
-  "go-1.20")
-    echo "Installing Go 1.20..."
+  "go-1.21")
+    echo "Installing Go 1.21..."
     case "$OS" in
       macos)
         # Use Homebrew for Go on macOS
-        brew install go@1.20
-        # Set up Go 1.20 as default (keg-only formula)
-        export PATH="/opt/homebrew/opt/go@1.20/bin:$PATH"
-        export GOROOT="/opt/homebrew/opt/go@1.20/libexec"
+        brew install go@1.21
+        # Set up Go 1.21 as default (keg-only formula)
+        export PATH="/opt/homebrew/opt/go@1.21/bin:$PATH"
+        export GOROOT="/opt/homebrew/opt/go@1.21/libexec"
         # Persist environment variables for subsequent steps
         echo "PATH=$PATH" >> $GITHUB_ENV
         echo "GOROOT=$GOROOT" >> $GITHUB_ENV
