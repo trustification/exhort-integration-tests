@@ -104,7 +104,7 @@ def run_scenario(language: str, cli_dir: str, scenario_dir: Path, runtime: str) 
     print("---")
     print(f"Scenario: {spec['title']}")
     print(f"Description: {spec['description']}")
-    print(f"Manifest: {scenario_dir}/{get_manifest_file(runtime)}")
+    print(f"Manifest: {scenario_dir / get_manifest_file(runtime)}")
     print(f"Expect success: {spec['expect_success']}")
     
     manifest_file = get_manifest_file(runtime)

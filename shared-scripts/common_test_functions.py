@@ -2,7 +2,6 @@
 
 import os
 import sys
-import platform
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -87,28 +86,31 @@ def get_commands(language: str, cli_dir: str, scenario_dir: str, manifest: str) 
     """Get the commands to run for a scenario."""
     commands = []
     
+    # Convert paths to Path objects and resolve to ensure proper cross-platform handling
+    cli_path = Path(cli_dir).resolve()
+    scenario_path = Path(scenario_dir).resolve()
+    manifest_path = scenario_path / manifest
+    
     if language == "javascript":
-        # Convert CLI_DIR to absolute path and normalize for Windows
-        cli_dir = str(Path(cli_dir).absolute())
-        if platform.system() == "Windows":
-            # For Windows, convert to proper drive letter format
-            if cli_dir.startswith("/") and len(cli_dir) > 2 and cli_dir[2] == "/":
-                drive_letter = cli_dir[1]
-                rest_of_path = cli_dir[3:]
-                cli_dir = f"{drive_letter}:/{rest_of_path}"
+        # For file:// URLs, we need forward slashes even on Windows
+        cli_url_path = cli_path.as_posix()
+        manifest_arg = str(manifest_path)
         
         commands.extend([
-            f"npx --yes file:///{cli_dir}/cli.tgz component {scenario_dir}/{manifest}",
-            f"npx --yes file:///{cli_dir}/cli.tgz stack {scenario_dir}/{manifest}",
-            f"npx --yes file:///{cli_dir}/cli.tgz stack {scenario_dir}/{manifest} --summary",
-            f"npx --yes file:///{cli_dir}/cli.tgz stack {scenario_dir}/{manifest} --html"
+            f"npx --yes file:///{cli_url_path}/cli.tgz component {manifest_arg}",
+            f"npx --yes file:///{cli_url_path}/cli.tgz stack {manifest_arg}",
+            f"npx --yes file:///{cli_url_path}/cli.tgz stack {manifest_arg} --summary",
+            f"npx --yes file:///{cli_url_path}/cli.tgz stack {manifest_arg} --html"
         ])
     elif language == "java":
+        cli_jar = cli_path / "cli.jar"
+        manifest_arg = str(manifest_path)
+        
         commands.extend([
-            f"java -jar {cli_dir}/cli.jar component {scenario_dir}/{manifest}",
-            f"java -jar {cli_dir}/cli.jar stack {scenario_dir}/{manifest}",
-            f"java -jar {cli_dir}/cli.jar stack {scenario_dir}/{manifest} --summary",
-            f"java -jar {cli_dir}/cli.jar stack {scenario_dir}/{manifest} --html"
+            f"java -jar {cli_jar} component {manifest_arg}",
+            f"java -jar {cli_jar} stack {manifest_arg}",
+            f"java -jar {cli_jar} stack {manifest_arg} --summary",
+            f"java -jar {cli_jar} stack {manifest_arg} --html"
         ])
     else:
         print(f"Unknown language: {language}", file=sys.stderr)
