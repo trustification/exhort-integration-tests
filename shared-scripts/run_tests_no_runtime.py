@@ -23,7 +23,7 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
         return True
     
     # Only run the simple scenario
-    scenario_dir = scenarios_dir / "simple"
+    scenario_dir = (scenarios_dir / "simple").resolve()
     if not scenario_dir.exists():
         print(f"Simple scenario not found for runtime: {runtime}")
         return True
