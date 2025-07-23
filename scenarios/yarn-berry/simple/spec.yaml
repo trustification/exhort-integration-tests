@@ -14,8 +14,8 @@ stack_analysis:
       total: 10
       dependencies: 8
       critical: 1
-      high: 6
-      medium: 3
+      high: 5
+      medium: 4
       low: 0
       remediations: 0
       recommendations: 0
@@ -32,8 +32,8 @@ component_analysis:
       total: 4
       dependencies: 3
       critical: 1
-      high: 2
-      medium: 1
+      high: 1
+      medium: 2
       low: 0
       remediations: 0
       recommendations: 0
