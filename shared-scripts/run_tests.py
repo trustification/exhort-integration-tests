@@ -19,6 +19,16 @@ def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_typ
     print(f"Output structure: {json.dumps(output, indent=2)}")
     print(f"Expected structure: {json.dumps(spec[analysis_type], indent=2)}")
     
+    # Handle empty or invalid output
+    if not output or not isinstance(output, dict):
+        print(f"❌ {analysis_type} output is empty or not a dictionary")
+        return False
+    
+    # Handle case where only providers key exists (empty result)
+    if len(output) == 1 and 'providers' in output and not output['providers']:
+        print(f"❌ {analysis_type} output is empty - only contains empty providers")
+        return False
+    
     expected = spec[analysis_type]
     actual = output
     
@@ -31,6 +41,15 @@ def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_typ
     if 'scanned' not in expected:
         print(f"❌ {analysis_type} expected spec missing 'scanned' key")
         print(f"Available keys in expected: {list(expected.keys())}")
+        return False
+
+    # Additional safety check - ensure scanned is a dictionary
+    if not isinstance(actual['scanned'], dict):
+        print(f"❌ {analysis_type} actual output 'scanned' is not a dictionary")
+        return False
+
+    if not isinstance(expected['scanned'], dict):
+        print(f"❌ {analysis_type} expected spec 'scanned' is not a dictionary")
         return False
 
     # Validate scanned metrics
@@ -54,6 +73,11 @@ def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_typ
     if 'providers' not in actual:
         print(f"❌ {analysis_type} actual output missing 'providers' key")
         print(f"Available keys in actual: {list(actual.keys())}")
+        return False
+
+    # Additional safety check - ensure providers is a dictionary
+    if not isinstance(actual['providers'], dict):
+        print(f"❌ {analysis_type} actual output 'providers' is not a dictionary")
         return False
 
     # Validate all providers and their sources
