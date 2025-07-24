@@ -20,6 +20,30 @@ stack_analysis:
       remediations: 13
       recommendations: 10
       unscanned: 0
+    osv:
+      direct: 7
+      transitive: 25
+      total: 32
+      dependencies: 20
+      critical: 5
+      high: 10
+      medium: 17
+      low: 0
+      remediations: 2
+      recommendations: 10
+      unscanned: 0
+    csaf:
+      direct: 4
+      transitive: 9
+      total: 13
+      dependencies: 10
+      critical: 1
+      high: 4
+      medium: 8
+      low: 0
+      remediations: 3
+      recommendations: 10
+      unscanned: 0
 component_analysis:
   scanned:
     total: 12
@@ -27,15 +51,26 @@ component_analysis:
     transitive: 0
   tpa:
     osv:
-      direct: 9
+      direct: 7
       transitive: 0
-      total: 9
+      total: 7
       dependencies: 3
       critical: 3
-      high: 6
+      high: 4
       medium: 0
       low: 0
-      remediations: 3
+      remediations: 2
       recommendations: 10
       unscanned: 0
-
+    csaf:
+      direct: 4
+      transitive: 0
+      total: 4
+      dependencies: 2
+      critical: 0
+      high: 2
+      medium: 2
+      low: 0
+      remediations: 2
+      recommendations: 10
+      unscanned: 0

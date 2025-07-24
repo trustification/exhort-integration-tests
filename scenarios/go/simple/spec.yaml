@@ -9,31 +9,31 @@ stack_analysis:
     transitive: 15
   tpa:
     osv:
-      direct: 3
-      transitive: 5
-      total: 8
+      direct: 2
+      transitive: 4
+      total: 6
       dependencies: 3
       critical: 1
       high: 2
-      medium: 5
+      medium: 3
       low: 0
       remediations: 0
       recommendations: 0
       unscanned: 0
 component_analysis:
   scanned:
-    total: 4
-    direct: 4
+    total: 5
+    direct: 5
     transitive: 0
   tpa:
     osv:
-      direct: 3
+      direct: 2
       transitive: 0
-      total: 3
+      total: 2
       dependencies: 1
       critical: 0
       high: 0
-      medium: 3
+      medium: 2
       low: 0
       remediations: 0
       recommendations: 0

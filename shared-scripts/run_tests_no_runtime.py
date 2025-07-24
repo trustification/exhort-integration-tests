@@ -23,7 +23,7 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
         return True
     
     # Only run the simple scenario
-    scenario_dir = scenarios_dir / "simple"
+    scenario_dir = (scenarios_dir / "simple").resolve()
     if not scenario_dir.exists():
         print(f"Simple scenario not found for runtime: {runtime}")
         return True
@@ -31,7 +31,7 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
     print("---")
     print("Scenario: No runtime available")
     print("Description: It fails when no runtime is available")
-    print(f"Manifest: {scenario_dir}/{get_manifest_file(runtime)}")
+    print(f"Manifest: {scenario_dir / get_manifest_file(runtime)}")
     print("Expecting failure (no runtime available)")
     
     commands = get_commands(language, cli_dir, str(scenario_dir), get_manifest_file(runtime))

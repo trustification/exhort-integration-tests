@@ -169,6 +169,13 @@ jobs:
           set -x
           python -u shared-scripts/run_tests_no_runtime.py ${{ inputs.language }} artifact ${{ matrix.runtime }}
 
+      - name: Setup Java for Cli execution
+        if: inputs.language == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
       - name: Setup Runtimes
         shell: bash
         working-directory: integration-tests
