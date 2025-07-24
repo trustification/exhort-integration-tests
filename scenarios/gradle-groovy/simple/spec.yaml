@@ -29,7 +29,7 @@ stack_analysis:
       high: 10
       medium: 17
       low: 0
-      remediations: 2
+      remediations: 1
       recommendations: 10
       unscanned: 0
     csaf:
@@ -59,7 +59,7 @@ component_analysis:
       high: 4
       medium: 0
       low: 0
-      remediations: 2
+      remediations: 1
       recommendations: 10
       unscanned: 0
     csaf:
