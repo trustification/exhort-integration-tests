@@ -4,8 +4,8 @@ description: Test a simple Go project with a few dependencies.
 expect_success: true
 stack_analysis:
   scanned:
-    total: 19
-    direct: 4
+    total: 20
+    direct: 5
     transitive: 15
   tpa:
     osv:
