@@ -9,12 +9,12 @@ stack_analysis:
     transitive: 40
   rhtpa:
     osv:
-      direct: 6
+      direct: 7
       transitive: 2
-      total: 8
+      total: 9
       dependencies: 4
       critical: 4
-      high: 3
+      high: 4
       medium: 1
       low: 0
       remediations: 0
@@ -39,12 +39,12 @@ component_analysis:
     transitive: 0
   rhtpa:
     osv:
-      direct: 6
+      direct: 7
       transitive: 0
-      total: 6
+      total: 7
       dependencies: 2
       critical: 3
-      high: 2
+      high: 3
       medium: 1
       low: 0
       remediations: 0
