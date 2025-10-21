@@ -7,7 +7,7 @@ stack_analysis:
     total: 247
     direct: 12
     transitive: 235
-  tpa:
+  rhtpa:
     osv:
       direct: 9
       transitive: 27
@@ -49,7 +49,7 @@ component_analysis:
     total: 12
     direct: 12
     transitive: 0
-  tpa:
+  rhtpa:
     osv:
       direct: 7
       transitive: 0
