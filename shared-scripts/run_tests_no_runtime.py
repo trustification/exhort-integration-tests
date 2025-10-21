@@ -58,6 +58,8 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
             "EXHORT_PYTHON_PATH",
             "EXHORT_PYTHON3_PATH",
             "EXHORT_NPM_PATH",
+            "EXHORT_PNPM_PATH",
+            "EXHORT_YARN_PATH",
             "EXHORT_MVN_PATH",
             "EXHORT_GRADLE_PATH",
             "EXHORT_GO_PATH"
