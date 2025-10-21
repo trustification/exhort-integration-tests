@@ -50,21 +50,23 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
         os.environ[env_var_name] = "INVALID"
         env_vars_to_restore[env_var_name] = original_env
         
-        # For Python runtime, set ALL Python-related environment variables to INVALID
-        # Based on exhort-javascript-api documentation: EXHORT_PIP_PATH, EXHORT_PIP3_PATH, 
-        # EXHORT_PYTHON_PATH, EXHORT_PYTHON3_PATH
-        if runtime.startswith('python'):
-            python_env_vars = [
-                "EXHORT_PIP_PATH",
-                "EXHORT_PIP3_PATH", 
-                "EXHORT_PYTHON_PATH",
-                "EXHORT_PYTHON3_PATH"
-            ]
-            
-            for env_var in python_env_vars:
-                if env_var not in env_vars_to_restore:  # Don't override if already set above
-                    env_vars_to_restore[env_var] = os.environ.get(env_var)
-                os.environ[env_var] = "INVALID"
+        # Set ALL possible environment variables to INVALID to ensure no runtime is available
+        # This covers all possible runtime detection mechanisms
+        all_env_vars = [
+            "EXHORT_PIP_PATH",
+            "EXHORT_PIP3_PATH", 
+            "EXHORT_PYTHON_PATH",
+            "EXHORT_PYTHON3_PATH",
+            "EXHORT_NPM_PATH",
+            "EXHORT_MVN_PATH",
+            "EXHORT_GRADLE_PATH",
+            "EXHORT_GO_PATH"
+        ]
+        
+        for env_var in all_env_vars:
+            if env_var not in env_vars_to_restore:  # Don't override if already set above
+                env_vars_to_restore[env_var] = os.environ.get(env_var)
+            os.environ[env_var] = "INVALID"
         
         try:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
