@@ -9,26 +9,14 @@ stack_analysis:
     transitive: 235
   rhtpa:
     osv:
-      direct: 9
-      transitive: 27
-      total: 36
-      dependencies: 20
-      critical: 5
-      high: 12
-      medium: 19
-      low: 0
-      remediations: 13
-      recommendations: 10
-      unscanned: 0
-    osv:
-      direct: 7
+      direct: 8
       transitive: 25
-      total: 32
-      dependencies: 20
+      total: 33
+      dependencies: 21
       critical: 5
-      high: 10
-      medium: 17
-      low: 0
+      high: 9
+      medium: 18
+      low: 1
       remediations: 2
       recommendations: 10
       unscanned: 0
