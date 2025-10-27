@@ -4,18 +4,18 @@ description: Test a simple Go project with a few dependencies.
 expect_success: true
 stack_analysis:
   scanned:
-    total: 19
+    total: 16
     direct: 4
-    transitive: 15
+    transitive: 12
   rhtpa:
     osv:
-      direct: 2
-      transitive: 4
-      total: 6
+      direct: 1
+      transitive: 2
+      total: 3
       dependencies: 3
-      critical: 1
-      high: 2
-      medium: 3
+      critical: 0
+      high: 1
+      medium: 2
       low: 0
       remediations: 0
       recommendations: 0
