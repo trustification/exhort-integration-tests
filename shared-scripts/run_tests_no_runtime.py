@@ -71,7 +71,15 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
             os.environ[env_var] = "INVALID"
         
         try:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            # Fix for Windows: Explicitly pass environment variables to subprocess
+            # On Windows, subprocess.run() with shell=True doesn't reliably inherit
+            # environment variables set via os.environ. This causes the "no runtime"
+            # tests to fail on Windows because the EXHORT_*_PATH=INVALID variables
+            # aren't properly passed to the child process, making commands succeed
+            # when they should fail. By explicitly passing the env parameter, we
+            # ensure consistent behavior across all platforms (Windows, Linux, macOS).
+            env = os.environ.copy()
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, env=env)
             
             # All commands should fail since no runtime is available
             if result.returncode == 0:
