@@ -10,7 +10,7 @@ from common_test_functions import (
     get_manifest_file,
     get_scenario_base_dir,
     get_commands,
-    get_env_var_name
+    get_package_manager
 )
 
 def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
@@ -39,20 +39,33 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
     for cmd in commands:
         print(f"Executing: {cmd}")
         
-        # Set the environment variable to an invalid path
-        env_var_name = get_env_var_name(runtime)
-        original_env = os.environ.get(env_var_name)
-        
         # Store original environment variables that will be modified
         env_vars_to_restore = {}
         
-        # Set the primary environment variable to INVALID
-        os.environ[env_var_name] = "INVALID"
-        env_vars_to_restore[env_var_name] = original_env
+        # Get both TRUSTIFY_DA_ and EXHORT_ env var names for this runtime
+        package_manager = get_package_manager(runtime)
+        trustify_var = f"TRUSTIFY_DA_{package_manager.upper()}_PATH"
+        exhort_var = f"EXHORT_{package_manager.upper()}_PATH"
+        
+        # Set both environment variables to INVALID
+        for env_var in [trustify_var, exhort_var]:
+            env_vars_to_restore[env_var] = os.environ.get(env_var)
+            os.environ[env_var] = "INVALID"
         
         # Set ALL possible environment variables to INVALID to ensure no runtime is available
         # This covers all possible runtime detection mechanisms
+        # Support both TRUSTIFY_DA_ (new) and EXHORT_ (legacy) prefixes
         all_env_vars = [
+            "TRUSTIFY_DA_PIP_PATH",
+            "TRUSTIFY_DA_PIP3_PATH", 
+            "TRUSTIFY_DA_PYTHON_PATH",
+            "TRUSTIFY_DA_PYTHON3_PATH",
+            "TRUSTIFY_DA_NPM_PATH",
+            "TRUSTIFY_DA_PNPM_PATH",
+            "TRUSTIFY_DA_YARN_PATH",
+            "TRUSTIFY_DA_MVN_PATH",
+            "TRUSTIFY_DA_GRADLE_PATH",
+            "TRUSTIFY_DA_GO_PATH",
             "EXHORT_PIP_PATH",
             "EXHORT_PIP3_PATH", 
             "EXHORT_PYTHON_PATH",

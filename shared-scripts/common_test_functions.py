@@ -77,11 +77,6 @@ def get_scenario_base_dir(runtime: str) -> str:
     
     return runtime
 
-def get_env_var_name(runtime: str) -> str:
-    """Get the environment variable name for the runtime."""
-    package_manager = get_package_manager(runtime)
-    return f"EXHORT_{package_manager.upper()}_PATH"
-
 def get_commands(language: str, cli_dir: str, scenario_dir: str, manifest: str) -> List[str]:
     """Get the commands to run for a scenario."""
     commands = []
