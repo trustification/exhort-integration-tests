@@ -88,9 +88,8 @@ jobs:
     needs: run-tests
     runs-on: ${{ matrix.os }}
     env:
-      EXHORT_DEV_MODE: true
       TRUSTIFY_DA_DEV_MODE: true
-      DEV_TRUSTIFY_DA_BACKEND_URL: 'https://exhort.stage.devshift.net'
+      TRUSTIFY_DA_BACKEND_URL: 'https://exhort.stage.devshift.net'
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: 1
     strategy:
