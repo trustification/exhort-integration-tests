@@ -8,29 +8,29 @@ stack_analysis:
     direct: 12
     transitive: 235
   rhtpa:
-    osv:
+    osv-github:
       direct: 8
-      transitive: 25
-      total: 33
-      dependencies: 21
+      transitive: 20
+      total: 28
+      dependencies: 16
       critical: 5
-      high: 9
-      medium: 18
+      high: 7
+      medium: 15
       low: 1
-      remediations: 2
-      recommendations: 10
+      remediations: 1
+      recommendations: 5
       unscanned: 0
-    csaf:
+    redhat-csaf:
       direct: 4
-      transitive: 9
-      total: 13
-      dependencies: 10
+      transitive: 7
+      total: 11
+      dependencies: 8
       critical: 1
-      high: 4
+      high: 2
       medium: 8
       low: 0
-      remediations: 3
-      recommendations: 10
+      remediations: 0
+      recommendations: 6
       unscanned: 0
 component_analysis:
   scanned:
@@ -38,7 +38,7 @@ component_analysis:
     direct: 12
     transitive: 0
   rhtpa:
-    osv:
+    osv-github:
       direct: 8
       transitive: 0
       total: 8
@@ -47,10 +47,10 @@ component_analysis:
       high: 5
       medium: 0
       low: 0
-      remediations: 1
-      recommendations: 10
+      remediations: 0
+      recommendations: 1
       unscanned: 0
-    csaf:
+    redhat-csaf:
       direct: 4
       transitive: 0
       total: 4
@@ -59,6 +59,6 @@ component_analysis:
       high: 2
       medium: 2
       low: 0
-      remediations: 2
-      recommendations: 10
+      remediations: 0
+      recommendations: 1
       unscanned: 0

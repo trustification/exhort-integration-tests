@@ -8,7 +8,7 @@ stack_analysis:
     direct: 3
     transitive: 9
   rhtpa:
-    osv:
+    osv-github:
       direct: 2
       transitive: 0
       total: 2
@@ -26,7 +26,7 @@ component_analysis:
     direct: 3
     transitive: 0
   rhtpa:
-    osv:
+    osv-github:
       direct: 2
       transitive: 0
       total: 2

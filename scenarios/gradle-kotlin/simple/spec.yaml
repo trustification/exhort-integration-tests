@@ -8,7 +8,7 @@ stack_analysis:
     direct: 4
     transitive: 2
   rhtpa:
-    osv:
+    osv-github:
       direct: 7
       transitive: 0
       total: 7
@@ -17,8 +17,8 @@ stack_analysis:
       high: 3
       medium: 1
       low: 0
-      remediations: 0
-      recommendations: 1
+      remediations: 1
+      recommendations: 2
       unscanned: 0
 component_analysis:
   scanned:
@@ -26,7 +26,7 @@ component_analysis:
     direct: 4
     transitive: 0
   rhtpa:
-    osv:
+    osv-github:
       direct: 7
       transitive: 0
       total: 7
@@ -35,6 +35,6 @@ component_analysis:
       high: 3
       medium: 1
       low: 0
-      remediations: 0
-      recommendations: 1
+      remediations: 1
+      recommendations: 2
       unscanned: 0
