@@ -8,13 +8,13 @@ stack_analysis:
     direct: 4
     transitive: 114
   rhtpa:
-    osv:
+    osv-github:
       direct: 5
-      transitive: 6
-      total: 11
-      dependencies: 8
+      transitive: 7
+      total: 12
+      dependencies: 9
       critical: 1
-      high: 5
+      high: 6
       medium: 5
       low: 0
       remediations: 0
@@ -26,7 +26,7 @@ component_analysis:
     direct: 4
     transitive: 0
   rhtpa:
-    osv:
+    osv-github:
       direct: 5
       transitive: 0
       total: 5
