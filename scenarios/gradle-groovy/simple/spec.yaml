@@ -10,27 +10,27 @@ stack_analysis:
   rhtpa:
     osv-github:
       direct: 8
-      transitive: 20
-      total: 28
-      dependencies: 16
+      transitive: 27
+      total: 35
+      dependencies: 21
       critical: 5
-      high: 7
-      medium: 15
+      high: 9
+      medium: 20
       low: 1
-      remediations: 1
-      recommendations: 5
+      remediations: 15
+      recommendations: 115
       unscanned: 0
     redhat-csaf:
       direct: 4
-      transitive: 7
-      total: 11
-      dependencies: 8
+      transitive: 9
+      total: 13
+      dependencies: 10
       critical: 1
-      high: 2
+      high: 4
       medium: 8
       low: 0
-      remediations: 0
-      recommendations: 6
+      remediations: 6
+      recommendations: 119
       unscanned: 0
 component_analysis:
   scanned:
