@@ -17,8 +17,8 @@ stack_analysis:
       high: 9
       medium: 19
       low: 1
-      remediations: 4
-      recommendations: 71
+      remediations: 14
+      recommendations: 115
       unscanned: 0
     redhat-csaf:
       direct: 4
