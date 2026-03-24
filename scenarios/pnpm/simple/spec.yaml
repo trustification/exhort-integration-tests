@@ -14,9 +14,9 @@ stack_analysis:
       total: 14
       dependencies: 9
       critical: 0
-      high: 6
+      high: 7
       medium: 6
-      low: 2
+      low: 1
       remediations: 0
       recommendations: 0
       unscanned: 0
