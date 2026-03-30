@@ -34,8 +34,13 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
     print(f"Manifest: {scenario_dir / get_manifest_file(runtime)}")
     print("Expecting failure (no runtime available)")
     
-    commands = get_commands(language, cli_dir, str(scenario_dir), get_manifest_file(runtime))
-    
+    all_commands = get_commands(language, cli_dir, str(scenario_dir), get_manifest_file(runtime))
+
+    # Skip the standalone license command — it may succeed without a runtime
+    # since it can read the manifest file directly without resolving dependencies
+    commands = [cmd for cmd in all_commands
+                if not ("license" in cmd and "stack" not in cmd and "component" not in cmd)]
+
     for cmd in commands:
         print(f"Executing: {cmd}")
         
