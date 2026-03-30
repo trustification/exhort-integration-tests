@@ -10,13 +10,13 @@ stack_analysis:
   rhtpa:
     osv-github:
       direct: 6
-      transitive: 8
-      total: 14
+      transitive: 9
+      total: 15
       dependencies: 9
       critical: 0
       high: 7
       medium: 6
-      low: 1
+      low: 2
       remediations: 0
       recommendations: 0
       unscanned: 0
