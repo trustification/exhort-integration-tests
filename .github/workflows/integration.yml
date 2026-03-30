@@ -129,6 +129,7 @@ jobs:
       - name: Checkout integration tests repo
         uses: actions/checkout@v4
         with:
+          repository: trustification/exhort-integration-tests
           path: integration-tests
 
       - name: Download Built Artifact
