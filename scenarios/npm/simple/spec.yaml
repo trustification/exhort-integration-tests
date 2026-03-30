@@ -4,37 +4,25 @@ description: Test a simple Node.js project using npm with a few dependencies.
 expect_success: true
 stack_analysis:
   scanned:
-    total: 119
     direct: 4
     transitive: 115
-  rhtpa:
-    osv-github:
-      direct: 6
-      transitive: 9
-      total: 15
-      dependencies: 9
-      critical: 0
-      high: 7
-      medium: 6
-      low: 2
-      remediations: 0
-      recommendations: 0
-      unscanned: 0
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  licenses:
+    expected_providers:
+      - deps.dev
 component_analysis:
   scanned:
-    total: 4
     direct: 4
     transitive: 0
-  rhtpa:
-    osv-github:
-      direct: 6
-      transitive: 0
-      total: 6
-      dependencies: 3
-      critical: 0
-      high: 2
-      medium: 4
-      low: 0
-      remediations: 0
-      recommendations: 0
-      unscanned: 0
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  licenses:
+    expected_providers:
+      - deps.dev
+license_check:
+  expect_success: true

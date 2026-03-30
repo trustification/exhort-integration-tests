@@ -95,7 +95,8 @@ def get_commands(language: str, cli_dir: str, scenario_dir: str, manifest: str) 
             f"npx --yes file:///{cli_url_path}/cli.tgz component {manifest_arg}",
             f"npx --yes file:///{cli_url_path}/cli.tgz stack {manifest_arg}",
             f"npx --yes file:///{cli_url_path}/cli.tgz stack {manifest_arg} --summary",
-            f"npx --yes file:///{cli_url_path}/cli.tgz stack {manifest_arg} --html"
+            f"npx --yes file:///{cli_url_path}/cli.tgz stack {manifest_arg} --html",
+            f"npx --yes file:///{cli_url_path}/cli.tgz license {manifest_arg}"
         ])
     elif language == "java":
         cli_jar = cli_path / "cli.jar"
@@ -105,7 +106,8 @@ def get_commands(language: str, cli_dir: str, scenario_dir: str, manifest: str) 
             f"java -jar {cli_jar} component {manifest_arg}",
             f"java -jar {cli_jar} stack {manifest_arg}",
             f"java -jar {cli_jar} stack {manifest_arg} --summary",
-            f"java -jar {cli_jar} stack {manifest_arg} --html"
+            f"java -jar {cli_jar} stack {manifest_arg} --html",
+            f"java -jar {cli_jar} license {manifest_arg}"
         ])
     else:
         print(f"Unknown language: {language}", file=sys.stderr)
