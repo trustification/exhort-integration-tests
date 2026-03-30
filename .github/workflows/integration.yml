@@ -129,10 +129,7 @@ jobs:
       - name: Checkout integration tests repo
         uses: actions/checkout@v4
         with:
-          repository: ruromero/exhort-integration-tests
-          ref: fix/exact-transitive-counts
           path: integration-tests
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download Built Artifact
         uses: actions/download-artifact@v4
