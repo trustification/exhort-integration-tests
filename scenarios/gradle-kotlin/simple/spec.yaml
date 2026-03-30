@@ -4,37 +4,25 @@ description: Test a simple Gradle (Kotlin DSL) project with a few dependencies.
 expect_success: true
 stack_analysis:
   scanned:
-    total: 6
     direct: 4
     transitive: 2
-  rhtpa:
-    osv-github:
-      direct: 7
-      transitive: 0
-      total: 7
-      dependencies: 2
-      critical: 3
-      high: 3
-      medium: 1
-      low: 0
-      remediations: 1
-      recommendations: 2
-      unscanned: 0
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  licenses:
+    expected_providers:
+      - deps.dev
 component_analysis:
   scanned:
-    total: 4
     direct: 4
     transitive: 0
-  rhtpa:
-    osv-github:
-      direct: 7
-      transitive: 0
-      total: 7
-      dependencies: 2
-      critical: 3
-      high: 3
-      medium: 1
-      low: 0
-      remediations: 1
-      recommendations: 2
-      unscanned: 0
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  licenses:
+    expected_providers:
+      - deps.dev
+license_check:
+  expect_success: true

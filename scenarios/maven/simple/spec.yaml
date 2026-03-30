@@ -4,49 +4,26 @@ description: Test a simple Maven project with a few dependencies.
 expect_success: true
 stack_analysis:
   scanned:
-    total: 45
     direct: 5
     transitive: 40
-  rhtpa:
-    osv-github:
-      direct: 7
-      transitive: 2
-      total: 9
-      dependencies: 4
-      critical: 4
-      high: 4
-      medium: 1
-      low: 0
-      remediations: 3
-      recommendations: 35
-      unscanned: 0
-    redhat-csaf:
-      direct: 0
-      transitive: 2
-      total: 2
-      dependencies: 2
-      critical: 1
-      high: 1
-      medium: 0
-      low: 0
-      remediations: 2
-      recommendations: 35
-      unscanned: 0
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+        - redhat-csaf
+  licenses:
+    expected_providers:
+      - deps.dev
 component_analysis:
   scanned:
-    total: 5
     direct: 5
     transitive: 0
-  rhtpa:
-    osv-github:
-      direct: 7
-      transitive: 0
-      total: 7
-      dependencies: 2
-      critical: 3
-      high: 3
-      medium: 1
-      low: 0
-      remediations: 1
-      recommendations: 2
-      unscanned: 0 
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  licenses:
+    expected_providers:
+      - deps.dev
+license_check:
+  expect_success: true

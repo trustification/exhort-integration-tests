@@ -129,8 +129,8 @@ jobs:
       - name: Checkout integration tests repo
         uses: actions/checkout@v4
         with:
-          repository: trustification/exhort-integration-tests
-          ref: main
+          repository: ruromero/exhort-integration-tests
+          ref: fix/exact-transitive-counts
           path: integration-tests
           token: ${{ secrets.GITHUB_TOKEN }}
 
