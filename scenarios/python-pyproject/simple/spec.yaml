@@ -1,0 +1,28 @@
+# simple scenario specification
+title: Simple Python pyproject.toml Scenario
+description: Test a Python project using PEP 621 pyproject.toml with pip fallback provider (no lock file).
+expect_success: true
+stack_analysis:
+  scanned:
+    direct: 2
+    transitive: 10
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  licenses:
+    expected_providers:
+      - deps.dev
+component_analysis:
+  scanned:
+    direct: 2
+    transitive: 0
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  licenses:
+    expected_providers:
+      - deps.dev
+license_check:
+  expect_success: true

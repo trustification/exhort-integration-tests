@@ -1,0 +1,28 @@
+# simple scenario specification
+title: Simple Rust Cargo Scenario
+description: Test a simple Rust project using Cargo.toml with a few dependencies.
+expect_success: true
+stack_analysis:
+  scanned:
+    direct: 3
+    transitive: 3
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  licenses:
+    expected_providers:
+      - deps.dev
+component_analysis:
+  scanned:
+    direct: 3
+    transitive: 0
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  licenses:
+    expected_providers:
+      - deps.dev
+license_check:
+  expect_success: true
