@@ -78,7 +78,7 @@ case "$RUNTIME" in
         echo "Go is already installed on $OS"
         ;;
     esac
-    
+
     echo "Installed Go version:"
     go version
     ;;
@@ -108,16 +108,16 @@ case "$RUNTIME" in
         ./rustup-init.exe -y --default-toolchain stable --profile minimal
         # Add cargo to PATH for this session
         export PATH="$HOME/.cargo/bin:$PATH"
-        # Persist PATH for subsequent steps
-        echo "PATH=$PATH" >> $GITHUB_ENV
+        # Use GITHUB_PATH to prepend without clobbering the existing PATH
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         ;;
       *)
         # Install Rust on Unix-like systems using rustup
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
         # Source cargo environment
         source "$HOME/.cargo/env"
-        # Persist PATH for subsequent steps
-        echo "PATH=$HOME/.cargo/bin:$PATH" >> $GITHUB_ENV
+        # Use GITHUB_PATH to prepend without clobbering the existing PATH
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         ;;
     esac
     echo "Installed Rust version:"
@@ -132,8 +132,8 @@ case "$RUNTIME" in
         curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$(pwd)"
         # Add current directory to PATH for this session
         export PATH="$(pwd):$PATH"
-        # Persist PATH for subsequent steps
-        echo "PATH=$PATH" >> $GITHUB_ENV
+        # Use GITHUB_PATH to prepend without clobbering the existing PATH
+        echo "$(pwd)" >> $GITHUB_PATH
         ;;
       *)
         # Install Syft on Unix-like systems using the official installation script
