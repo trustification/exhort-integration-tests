@@ -70,8 +70,8 @@ case "$RUNTIME" in
         # Set up Go 1.21 as default (keg-only formula)
         export PATH="/opt/homebrew/opt/go@1.21/bin:$PATH"
         export GOROOT="/opt/homebrew/opt/go@1.21/libexec"
-        # Use GITHUB_PATH to prepend without clobbering the existing PATH
-        echo "/opt/homebrew/opt/go@1.21/bin" >> $GITHUB_PATH
+        # Persist environment variables for subsequent steps
+        echo "PATH=$PATH" >> $GITHUB_ENV
         echo "GOROOT=$GOROOT" >> $GITHUB_ENV
         ;;
       *)
@@ -89,8 +89,7 @@ case "$RUNTIME" in
         brew install go@1.24
         export PATH="/opt/homebrew/opt/go@1.24/bin:$PATH"
         export GOROOT="/opt/homebrew/opt/go@1.24/libexec"
-        # Use GITHUB_PATH to prepend without clobbering the existing PATH
-        echo "/opt/homebrew/opt/go@1.24/bin" >> $GITHUB_PATH
+        echo "PATH=$PATH" >> $GITHUB_ENV
         echo "GOROOT=$GOROOT" >> $GITHUB_ENV
         ;;
       *)
