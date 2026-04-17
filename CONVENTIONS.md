@@ -71,8 +71,9 @@ expect_success: true
 
 stack_analysis:
   scanned:
-    direct: 5          # Number of direct dependencies (deterministic, must match manifest)
-    transitive: 40     # Number of transitive dependencies (deterministic, must match resolved tree)
+    direct: 5               # Number of direct dependencies (deterministic, must match manifest)
+    transitive: 40          # Number of transitive dependencies (deterministic, must match resolved tree)
+    transitive_windows: 42  # Optional: OS-specific override for Windows (if different from base)
   providers:
     rhtpa:
       sources:
@@ -106,6 +107,9 @@ license_check:
 - `stack_analysis`: Expected results for stack analysis command
   - `scanned.direct`: Number of direct dependencies (must match manifest exactly)
   - `scanned.transitive`: Number of transitive dependencies (must match resolved dependency tree)
+  - `scanned.transitive_windows`: (Optional) OS-specific override for Windows
+  - `scanned.transitive_linux`: (Optional) OS-specific override for Linux
+  - `scanned.transitive_macos`: (Optional) OS-specific override for macOS
   - `providers.<provider_name>.sources`: List of expected data sources
   - `licenses.expected_providers`: List of expected license providers
 - `component_analysis`: Expected results for component analysis command (same structure as stack_analysis)
@@ -119,6 +123,27 @@ The `transitive` count in `spec.yaml` must be **deterministic and exact**. To de
 2. Count the actual transitive dependencies in the resolved dependency tree
 3. Use that exact count in the spec — do not estimate or use placeholder values
 4. If dependency counts change (e.g., after updating a dependency), update the spec to match
+
+### OS-Specific Transitive Count Overrides
+
+Some ecosystems have platform-specific dependencies (e.g., Python's `colorama` on Windows). When the transitive count varies by OS, use OS-specific override fields:
+
+- `transitive_windows`: Override for Windows (platform.system() == "Windows")
+- `transitive_linux`: Override for Linux (platform.system() == "Linux")
+- `transitive_macos`: Override for macOS (platform.system() == "Darwin")
+
+The test runner checks for an OS-specific override first (`transitive_<os>`), then falls back to the base `transitive` field. The base `transitive` field is still required — it serves as the default for any OS without an explicit override.
+
+Example:
+```yaml
+stack_analysis:
+  scanned:
+    direct: 2
+    transitive: 10          # Default for Linux/macOS
+    transitive_windows: 11  # Windows pulls in colorama as a platform-specific dependency
+```
+
+**Important:** Only `transitive` counts support OS overrides. The `direct` count should NOT have OS-specific variants, as direct dependencies are declared in the manifest and do not vary by platform.
 
 ## Error Handling
 

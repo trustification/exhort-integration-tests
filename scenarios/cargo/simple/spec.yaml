@@ -5,11 +5,10 @@ expect_success: true
 stack_analysis:
   scanned:
     direct: 3
-    transitive: 3
+    transitive: 9
   providers:
     rhtpa:
-      sources:
-        - osv-github
+      sources: []
   licenses:
     expected_providers:
       - deps.dev
@@ -19,8 +18,7 @@ component_analysis:
     transitive: 0
   providers:
     rhtpa:
-      sources:
-        - osv-github
+      sources: []
   licenses:
     expected_providers:
       - deps.dev

@@ -17,6 +17,7 @@ import sys
 import json
 import yaml
 import subprocess
+import platform
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -38,6 +39,19 @@ LICENSE_SUMMARY_FIELDS = [
     "total", "concluded", "permissive", "weakCopyleft",
     "strongCopyleft", "unknown", "deprecated", "osiApproved", "fsfLibre"
 ]
+
+
+def get_os_name() -> str:
+    """Map platform.system() to OS name for spec.yaml overrides."""
+    system = platform.system()
+    if system == "Windows":
+        return "windows"
+    elif system == "Darwin":
+        return "macos"
+    elif system == "Linux":
+        return "linux"
+    else:
+        return "unknown"
 
 
 def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_type: str) -> bool:
@@ -70,10 +84,21 @@ def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_typ
                   f"got {scanned.get('direct')}")
             ok = False
 
-    # Deterministic: transitive count must match exactly
-    if "transitive" in exp_scanned:
-        if scanned.get("transitive") != exp_scanned["transitive"]:
-            print(f"  FAIL {analysis_type} scanned.transitive: expected {exp_scanned['transitive']}, "
+    # Deterministic: transitive count must match exactly (with OS-specific override support)
+    os_name = get_os_name()
+    transitive_key = f"transitive_{os_name}"
+
+    # Check for OS-specific override first, then fall back to base transitive
+    if transitive_key in exp_scanned:
+        expected_transitive = exp_scanned[transitive_key]
+    elif "transitive" in exp_scanned:
+        expected_transitive = exp_scanned["transitive"]
+    else:
+        expected_transitive = None
+
+    if expected_transitive is not None:
+        if scanned.get("transitive") != expected_transitive:
+            print(f"  FAIL {analysis_type} scanned.transitive: expected {expected_transitive}, "
                   f"got {scanned.get('transitive')}")
             ok = False
 
