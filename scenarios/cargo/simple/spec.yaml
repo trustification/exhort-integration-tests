@@ -1,14 +1,17 @@
 # simple scenario specification
+# Uses regex 1.5.4 (CVE-2022-24713) and chrono 0.4.19 (transitive CVE-2020-26235
+# via time 0.1.45) to exercise vulnerability detection through osv-rustsec.
 title: Simple Rust Cargo Scenario
-description: Test a simple Rust project using Cargo.toml with a few dependencies.
+description: Test a simple Rust project using Cargo.toml with known-vulnerable dependencies.
 expect_success: true
 stack_analysis:
   scanned:
     direct: 3
-    transitive: 9
+    transitive: 11
   providers:
     rhtpa:
-      sources: []
+      sources:
+        - osv-rustsec
   licenses:
     expected_providers:
       - deps.dev
@@ -18,7 +21,8 @@ component_analysis:
     transitive: 0
   providers:
     rhtpa:
-      sources: []
+      sources:
+        - osv-rustsec
   licenses:
     expected_providers:
       - deps.dev
