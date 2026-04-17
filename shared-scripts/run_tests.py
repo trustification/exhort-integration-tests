@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+"""
+Main integration test runner.
+
+Discovers test scenarios under scenarios/<ecosystem>/, executes the Exhort CLI
+(component, stack, stack --summary, stack --html, license) against each one,
+and validates responses against the expected values in spec.yaml.
+
+Usage: python run_tests.py <language> <cli_dir> <runtime>
+  language:  "java" or "javascript" — determines CLI invocation style
+  cli_dir:   directory containing cli.jar (Java) or cli.tgz (JavaScript)
+  runtime:   ecosystem runtime identifier (e.g. "maven", "npm", "cargo-stable")
+"""
 
 import os
 import sys

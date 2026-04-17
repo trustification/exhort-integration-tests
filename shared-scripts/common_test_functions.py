@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""
+Shared utilities for integration test runners.
+
+Maps CLI runtimes (e.g. "python-3.12-pyproject", "cargo-stable") to their
+manifest filenames, package managers, and scenario directories. Also builds
+the CLI command lists that run_tests.py and run_tests_no_runtime.py execute
+for each scenario.
+"""
 
 import os
 import sys
@@ -11,13 +19,19 @@ def get_manifest_file(runtime: str) -> str:
 
     if runtime.startswith("syft"):
         return "TODO: Implement OCI CLI support for Syft"
-    
+
     if runtime.startswith('go'):
         return "go.mod"
-    
+
     if runtime.startswith('python'):
+        # Handle both python-pip (requirements.txt) and python-pyproject (pyproject.toml)
+        if 'pyproject' in runtime:
+            return "pyproject.toml"
         return "requirements.txt"
-    
+
+    if runtime.startswith('cargo'):
+        return "Cargo.toml"
+
     manifest_map = {
         "maven": "pom.xml",
         "gradle-groovy": "build.gradle",
@@ -36,19 +50,23 @@ def get_manifest_file(runtime: str) -> str:
 def get_package_manager(runtime: str) -> str:
     """Get the package manager name based on runtime."""
     runtime = runtime.lower()
-    
+
     if runtime.startswith("syft"):
         print(f"TODO: Implement Integration Test support for {runtime}")
         sys.exit(0)
-    
+
     # Handle Go runtimes
     if runtime.startswith('go'):
         return "go"
-    
+
     # Handle Python runtimes
     if runtime.startswith('python'):
         return "pip"
-    
+
+    # Handle Rust/Cargo runtimes
+    if runtime.startswith('cargo'):
+        return "cargo"
+
     package_manager_map = {
         "npm": "npm",
         "yarn-classic": "yarn",
@@ -70,11 +88,18 @@ def get_scenario_base_dir(runtime: str) -> str:
 
     # Handle Python runtimes
     if runtime.startswith('python'):
+        # python-pyproject scenarios go to python-pyproject directory
+        if 'pyproject' in runtime:
+            return "python-pyproject"
+        # python-pip scenarios go to python-pip directory
         return "python-pip"
-    
+
     if runtime.startswith("go"):
         return "go"
-    
+
+    if runtime.startswith("cargo"):
+        return "cargo"
+
     return runtime
 
 def get_commands(language: str, cli_dir: str, scenario_dir: str, manifest: str) -> List[str]:

@@ -1,0 +1,12 @@
+# Integration test scenario: Simple Rust project with pinned dependencies.
+# Cargo.lock is committed for deterministic transitive dependency counts.
+# Expected: 3 direct deps, 3 transitive deps.
+[package]
+name = "simple-cargo-scenario"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = "=1.0.219"
+serde_json = "=1.0.140"
+log = "=0.4.27"

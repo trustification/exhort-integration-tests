@@ -108,6 +108,8 @@ jobs:
           - go-latest
           - python-3.10-pip
           - python-3.12-pip
+          - python-3.12-pyproject
+          - cargo-stable
           - syft
 
     steps:

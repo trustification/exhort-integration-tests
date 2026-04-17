@@ -1,4 +1,6 @@
 #!/bin/bash
+# Print installed versions of all ecosystem runtimes.
+# Called by CI after setup-runtime.sh to log the test environment.
 set -e
 
 # Function to check version of a command

@@ -1,4 +1,7 @@
 #!/bin/bash
+# Install ecosystem runtimes required by integration test scenarios.
+# Called by CI with a single argument: the runtime identifier from the matrix
+# (e.g. "yarn-berry", "cargo-stable", "go-1.21"). Handles Linux/macOS/Windows.
 set -e
 
 RUNTIME="$1"
@@ -95,6 +98,31 @@ case "$RUNTIME" in
     esac
     echo "Installed Go version:"
     go version
+    ;;
+  "cargo-stable")
+    echo "Installing Rust (stable)..."
+    case "$OS" in
+      windows)
+        # Install Rust on Windows using rustup-init
+        curl --proto '=https' --tlsv1.2 -sSf https://win.rustup.rs/x86_64 -o rustup-init.exe
+        ./rustup-init.exe -y --default-toolchain stable --profile minimal
+        # Add cargo to PATH for this session
+        export PATH="$HOME/.cargo/bin:$PATH"
+        # Persist PATH for subsequent steps
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        ;;
+      *)
+        # Install Rust on Unix-like systems using rustup
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
+        # Source cargo environment
+        source "$HOME/.cargo/env"
+        # Persist PATH for subsequent steps
+        echo "PATH=$HOME/.cargo/bin:$PATH" >> $GITHUB_ENV
+        ;;
+    esac
+    echo "Installed Rust version:"
+    rustc --version
+    cargo --version
     ;;
   "syft")
     echo "Installing Syft..."
