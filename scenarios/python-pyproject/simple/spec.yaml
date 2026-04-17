@@ -6,6 +6,7 @@ stack_analysis:
   scanned:
     direct: 2
     transitive: 10
+    transitive_windows: 11
   providers:
     rhtpa:
       sources:

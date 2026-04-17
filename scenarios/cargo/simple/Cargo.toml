@@ -1,12 +1,15 @@
 # Integration test scenario: Simple Rust project with pinned dependencies.
 # Cargo.lock is committed for deterministic transitive dependency counts.
-# Expected: 3 direct deps, 3 transitive deps.
+# Uses older versions of regex and chrono that have known vulnerabilities:
+#   - regex 1.5.4: CVE-2022-24713 (HIGH) — ReDoS via regex-syntax
+#   - chrono 0.4.19 → time 0.1.45: CVE-2020-26235 (MEDIUM) — localtime_r unsoundness
+# Expected: 3 direct deps, 11 transitive deps.
 [package]
 name = "simple-cargo-scenario"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = "=1.0.219"
-serde_json = "=1.0.140"
+regex = "=1.5.4"
+chrono = "=0.4.19"
 log = "=0.4.27"
