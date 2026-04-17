@@ -6,8 +6,8 @@ This document describes the coding conventions, project structure, test patterns
 
 - **Primary language:** Python 3.11+
 - **Testing framework:** Custom Python test orchestration using subprocess calls
-- **CI/CD:** Tekton pipelines and GitHub Actions workflows
-- **Supported ecosystems:** Maven, Gradle (Groovy & Kotlin), npm, pnpm, Yarn (Classic & Berry), pip, Go, Syft
+- **CI/CD:** GitHub Actions workflows
+- **Supported ecosystems:** Maven, Gradle (Groovy & Kotlin), npm, pnpm, Yarn (Classic & Berry), pip, pyproject (pip/uv/poetry), Cargo, Go, Syft
 
 ## Code Style
 
@@ -36,8 +36,6 @@ This document describes the coding conventions, project structure, test patterns
 - Shell scripts: Use kebab-case (e.g., `setup-runtime.sh`, `print-runtime.sh`)
 - Scenario directories: Use kebab-case matching ecosystem name (e.g., `maven/simple`, `gradle-kotlin/simple`, `python-pip/simple`)
 - Spec files: Always named `spec.yaml` within each scenario directory
-- Tekton tasks: Use snake_case (e.g., `test_analysis.yaml`, `test_app_health.yaml`)
-- Tekton pipelines: Use kebab-case or snake_case (e.g., `integration-test.yaml`, `basic-it.yaml`)
 
 ### Functions and Constants
 
@@ -51,32 +49,9 @@ This document describes the coding conventions, project structure, test patterns
 
 ```
 exhort-integration-tests/
-├── scenarios/                    # Test scenarios organized by ecosystem
-│   ├── maven/simple/
-│   │   ├── pom.xml              # Manifest file for the ecosystem
-│   │   └── spec.yaml            # Test specification
-│   ├── gradle-kotlin/simple/
-│   │   ├── build.gradle.kts
-│   │   └── spec.yaml
-│   ├── npm/simple/
-│   │   ├── package.json
-│   │   └── spec.yaml
-│   └── ...                      # Other ecosystems
-├── shared-scripts/              # Test orchestration Python scripts
-│   ├── run_tests.py            # Main test runner
-│   ├── run_tests_no_runtime.py # Test runner without runtime setup
-│   ├── common_test_functions.py # Shared utilities
-│   ├── setup-runtime.sh        # Runtime installation script
-│   └── print-runtime.sh        # Runtime version display script
-├── tasks/                       # Tekton task definitions
-│   ├── test_analysis.yaml      # Core analysis testing
-│   ├── test_app_health.yaml    # Backend health checks
-│   └── deploy-exhort.yaml      # Deployment tasks
-├── pipelines/                   # Tekton pipeline definitions
-│   ├── integration_test.yaml   # Main integration pipeline
-│   └── basic-it.yaml           # Basic integration test pipeline
-└── .github/workflows/           # GitHub Actions CI workflows
-    └── integration.yml         # Shared integration workflow
+├── scenarios/           # Test scenarios organized by ecosystem (e.g. maven/, npm/, cargo/)
+├── shared-scripts/      # Test orchestration scripts (Python + Bash)
+└── .github/workflows/   # GitHub Actions CI workflows
 ```
 
 ### Scenario Directory Structure
@@ -234,7 +209,7 @@ Follow Conventional Commits specification:
 
 - Format: `<type>[optional scope]: <description>`
 - Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`
-- Scope examples: `maven`, `npm`, `gradle`, `ci`, `tekton`, `scripts`
+- Scope examples: `maven`, `npm`, `gradle`, `cargo`, `ci`, `scripts`
 - Examples:
   - `feat(npm): add yarn-berry simple scenario`
   - `fix(scripts): correct transitive dependency count validation`
@@ -261,6 +236,7 @@ Each ecosystem requires its native tooling installed:
 - **Yarn Berry:** `yarn` v4.x (Node.js 20+, using corepack)
 - **Go:** `go` 1.21+ or latest
 - **Python pip:** `pip` (Python 3.10+)
+- **Cargo:** `cargo` (Rust stable)
 - **Syft:** `syft` CLI
 
 ## CI Checks
@@ -288,14 +264,6 @@ The integration workflow (`.github/workflows/integration.yml`) runs tests across
   3. Run tests without runtime-specific setup (`run_tests_no_runtime.py`)
   4. Setup ecosystem runtimes (`setup-runtime.sh`)
   5. Run full integration tests (`run_tests.py`)
-
-### Tekton Pipelines
-
-Tekton pipelines validate deployed Exhort instances:
-- `test_app_health.yaml` — Checks application health endpoint
-- `test_analysis.yaml` — Posts SBOM to analysis endpoint and validates response structure
-
-These are used for deployment validation, not for CLI integration tests.
 
 ## Test Execution
 

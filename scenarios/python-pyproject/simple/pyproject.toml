@@ -1,3 +1,6 @@
+# Integration test scenario: Simple Python project using PEP 621 pyproject.toml.
+# No lock file — pip resolves transitive dependencies at install time.
+# Expected: 2 direct deps, ~10 transitive deps.
 [project]
 name = "simple-pyproject-scenario"
 version = "1.0.0"

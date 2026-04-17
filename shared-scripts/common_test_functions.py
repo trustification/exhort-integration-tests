@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""
+Shared utilities for integration test runners.
+
+Maps CLI runtimes (e.g. "python-3.12-pyproject", "cargo-stable") to their
+manifest filenames, package managers, and scenario directories. Also builds
+the CLI command lists that run_tests.py and run_tests_no_runtime.py execute
+for each scenario.
+"""
 
 import os
 import sys

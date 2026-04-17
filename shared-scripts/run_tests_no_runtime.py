@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""
+No-runtime integration test runner.
+
+Verifies that the CLI fails gracefully when ecosystem runtimes are unavailable.
+Sets all TRUSTIFY_DA_*_PATH and EXHORT_*_PATH env vars to "INVALID" so the CLI
+cannot discover any package manager, then asserts that every command exits non-zero.
+
+Usage: python run_tests_no_runtime.py <language> <cli_dir> <runtime>
+"""
 
 import os
 import sys

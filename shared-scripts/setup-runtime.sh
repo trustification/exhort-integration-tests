@@ -1,4 +1,7 @@
 #!/bin/bash
+# Install ecosystem runtimes required by integration test scenarios.
+# Called by CI with a single argument: the runtime identifier from the matrix
+# (e.g. "yarn-berry", "cargo-stable", "go-1.21"). Handles Linux/macOS/Windows.
 set -e
 
 RUNTIME="$1"
