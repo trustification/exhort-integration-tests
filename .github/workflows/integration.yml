@@ -90,6 +90,7 @@ jobs:
     env:
       TRUSTIFY_DA_DEV_MODE: true
       TRUSTIFY_DA_BACKEND_URL: 'https://exhort.stage.devshift.net'
+      JAVA_TOOL_OPTIONS: '-Dtrustify.cargo.timeout.seconds=120'
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: 1
     strategy:
