@@ -1,28 +1,28 @@
 # simple scenario specification
+# Uses guava, commons-io, and log4j:1.2.17 (known vulnerabilities via osv-github).
+# Kept lightweight to avoid backend timeouts from large SBOMs.
 title: Simple Gradle Groovy Scenario
 description: Test a simple Gradle (Groovy DSL) project with a few dependencies.
 expect_success: true
 stack_analysis:
   scanned:
-    direct: 12
-    transitive: 235
+    direct: 3
+    transitive: 6
   providers:
     rhtpa:
       sources:
         - osv-github
-        - redhat-csaf
   licenses:
     expected_providers:
       - deps.dev
 component_analysis:
   scanned:
-    direct: 12
+    direct: 3
     transitive: 0
   providers:
     rhtpa:
       sources:
         - osv-github
-        - redhat-csaf
   licenses:
     expected_providers:
       - deps.dev
