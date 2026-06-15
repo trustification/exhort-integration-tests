@@ -156,7 +156,7 @@ def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_typ
             if not ok:
                 continue
 
-            # Invariant: total == critical + high + medium + low
+            # Invariant: total == critical + high + medium + low + unknown
             severity_sum = summary["critical"] + summary["high"] + summary["medium"] + summary["low"] + summary["unknown"]
             if summary["total"] != severity_sum:
                 print(f"  FAIL {analysis_type} {provider_name}/{source_name} "
