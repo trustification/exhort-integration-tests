@@ -31,7 +31,7 @@ VALID_LICENSE_CATEGORIES = {"PERMISSIVE", "WEAK_COPYLEFT", "STRONG_COPYLEFT", "U
 
 VULN_SUMMARY_FIELDS = [
     "direct", "transitive", "total", "dependencies",
-    "critical", "high", "medium", "low",
+    "critical", "high", "medium", "low", "unknown",
     "remediations", "recommendations", "unscanned"
 ]
 
@@ -157,10 +157,10 @@ def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_typ
                 continue
 
             # Invariant: total == critical + high + medium + low
-            severity_sum = summary["critical"] + summary["high"] + summary["medium"] + summary["low"]
+            severity_sum = summary["critical"] + summary["high"] + summary["medium"] + summary["low"] + summary["unknown"]
             if summary["total"] != severity_sum:
                 print(f"  FAIL {analysis_type} {provider_name}/{source_name} "
-                      f"total ({summary['total']}) != critical+high+medium+low ({severity_sum})")
+                      f"total ({summary['total']}) != critical+high+medium+low+unknown ({severity_sum})")
                 ok = False
 
             # Invariant: direct + transitive == total
