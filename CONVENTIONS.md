@@ -179,7 +179,7 @@ Tests validate responses using **structural and invariant checks**:
 2. **Deterministic checks**: Verify counts match expected values exactly (direct dependencies, transitive dependencies)
 3. **Invariant checks**: Verify mathematical relationships hold:
    - `total == direct + transitive` (dependency counts)
-   - `total == critical + high + medium + low` (vulnerability counts)
+   - `total == critical + high + medium + low + unknown` (vulnerability counts)
    - `total == permissive + weakCopyleft + strongCopyleft + unknown` (license categories)
    - All counts must be non-negative
 4. **Provider checks**: Verify expected providers are present and have `ok: true` status with `code: 200`
