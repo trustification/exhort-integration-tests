@@ -26,9 +26,9 @@ jobs:
 
       - name: Setup Node.js
         if: inputs.language == 'javascript'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           registry-url: 'https://npm.pkg.github.com'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -93,6 +93,7 @@ jobs:
       JAVA_TOOL_OPTIONS: '-Dtrustify.cargo.timeout.seconds=120'
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: 1
+      npm_config_ignore_scripts: 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -127,13 +128,19 @@ jobs:
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           chcp 65001
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Checkout integration tests repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: trustification/exhort-integration-tests
           path: integration-tests
+
+      - name: Setup Node.js
+        if: inputs.language == 'javascript'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
 
       - name: Download Built Artifact
         uses: actions/download-artifact@v4
