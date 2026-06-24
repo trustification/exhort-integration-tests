@@ -89,7 +89,9 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
             "EXHORT_YARN_PATH",
             "EXHORT_MVN_PATH",
             "EXHORT_GRADLE_PATH",
-            "EXHORT_GO_PATH"
+            "EXHORT_GO_PATH",
+            "TRUSTIFY_DA_SYFT_PATH",
+            "EXHORT_SYFT_PATH"
         ]
         
         for env_var in all_env_vars:

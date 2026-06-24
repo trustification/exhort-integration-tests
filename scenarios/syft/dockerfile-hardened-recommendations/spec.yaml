@@ -1,0 +1,22 @@
+# Dockerfile hardened image recommendations scenario
+title: Dockerfile Hardened Image Recommendations
+description: Verify hardened image recommendations are returned for a Dockerfile with a non-hardened base image.
+expect_success: true
+stack_analysis:
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  recommendations:
+    expect_recommendations: true
+    expected_sources:
+      - hardened
+component_analysis:
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  recommendations:
+    expect_recommendations: true
+    expected_sources:
+      - hardened

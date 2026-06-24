@@ -1,0 +1,23 @@
+# Containerfile UBI recommendations scenario
+title: Containerfile UBI Recommendations
+description: Verify UBI recommendations are returned alongside hardened recommendations for a Containerfile image.
+expect_success: true
+manifest_file: Containerfile
+stack_analysis:
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  recommendations:
+    expect_recommendations: true
+    expected_sources:
+      - ubi
+component_analysis:
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  recommendations:
+    expect_recommendations: true
+    expected_sources:
+      - ubi

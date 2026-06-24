@@ -1,0 +1,20 @@
+# Dockerfile recommendations disabled scenario
+title: Dockerfile Recommendations Disabled
+description: Verify recommendations are suppressed when recommend=false query parameter is set.
+expect_success: true
+env:
+  TRUSTIFY_DA_RECOMMEND: "false"
+stack_analysis:
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  recommendations:
+    expect_recommendations: false
+component_analysis:
+  providers:
+    rhtpa:
+      sources:
+        - osv-github
+  recommendations:
+    expect_recommendations: false
