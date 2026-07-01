@@ -288,14 +288,25 @@ def validate_recommendations(output: Dict[str, Any], rec_spec: Dict[str, Any], a
     expect_present = rec_spec.get("expect_recommendations", True)
     expected_sources = rec_spec.get("expected_sources", [])
 
-    # Count recommendations across all provider source summaries
+    # Count recommendations from two locations:
+    # 1. Vulnerability source summaries: providers.*.sources.*.summary.recommendations
+    # 2. Hardened image recommendations: providers.*.recommendations.hardened.summary.total
     total_recommendations = 0
+    found_sources = set()
     providers = output.get("providers", {})
     for prov_name, prov_data in providers.items():
         sources = prov_data.get("sources", {})
         for src_name, src_data in sources.items():
             summary = src_data.get("summary", {})
             total_recommendations += summary.get("recommendations", 0)
+
+        # Check hardened image recommendations
+        recs = prov_data.get("recommendations", {})
+        for rec_source, rec_data in recs.items():
+            rec_total = rec_data.get("summary", {}).get("total", 0)
+            total_recommendations += rec_total
+            if rec_total > 0:
+                found_sources.add(rec_source)
 
     ok = True
 
@@ -310,21 +321,9 @@ def validate_recommendations(output: Dict[str, Any], rec_spec: Dict[str, Any], a
 
     # Check recommendation sources if specified
     if expected_sources and expect_present and ok:
-        found_sources = set()
-        for prov_name, prov_data in providers.items():
-            sources_data = prov_data.get("sources", {})
-            for src_name, src_data in sources_data.items():
-                recs = src_data.get("recommendations", [])
-                if isinstance(recs, list):
-                    for rec in recs:
-                        if isinstance(rec, dict):
-                            rs = rec.get("recommendationSource")
-                            if rs:
-                                found_sources.add(rs)
-
         for expected_source in expected_sources:
             if expected_source not in found_sources:
-                print(f"  FAIL {analysis_type} expected recommendationSource '{expected_source}' "
+                print(f"  FAIL {analysis_type} expected recommendation source '{expected_source}' "
                       f"not found (found: {found_sources or 'none'})")
                 ok = False
 
