@@ -54,8 +54,44 @@ def get_os_name() -> str:
         return "unknown"
 
 
+def is_batch_response(output: Dict[str, Any]) -> bool:
+    """Detect whether the output is a batch response (purl-keyed map of AnalysisReports).
+
+    Batch responses contain at least one purl key and no top-level 'scanned' key.
+    Non-purl metadata keys like 'packageManager' may also be present.
+    """
+    if not output:
+        return False
+    has_purl = any(key.startswith("pkg:") for key in output.keys())
+    has_scanned = "scanned" in output
+    return has_purl and not has_scanned
+
+
 def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_type: str) -> bool:
-    """Validate analysis results using structural and invariant checks."""
+    """Validate analysis results using structural and invariant checks.
+
+    Handles both single AnalysisReport and batch responses (purl-keyed map).
+    For batch responses, each inner report is validated independently.
+    """
+    if not output or not isinstance(output, dict):
+        print(f"  FAIL {analysis_type} output is empty or not a dictionary")
+        return False
+
+    if is_batch_response(output):
+        reports = {k: v for k, v in output.items() if k.startswith("pkg:")}
+        print(f"  INFO {analysis_type} detected batch response with {len(reports)} report(s)")
+        ok = True
+        for purl, report in reports.items():
+            print(f"  Validating batch entry: {purl}")
+            if not validate_single_analysis(report, spec, analysis_type):
+                ok = False
+        return ok
+
+    return validate_single_analysis(output, spec, analysis_type)
+
+
+def validate_single_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_type: str) -> bool:
+    """Validate a single AnalysisReport against the spec."""
     if not output or not isinstance(output, dict):
         print(f"  FAIL {analysis_type} output is empty or not a dictionary")
         return False
