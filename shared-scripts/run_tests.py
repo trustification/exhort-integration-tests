@@ -55,16 +55,19 @@ def get_os_name() -> str:
 
 
 def is_batch_response(output: Dict[str, Any]) -> bool:
-    """Detect whether the output is a batch response (purl-keyed map of AnalysisReports).
+    """Detect whether the output is a batch response (map of AnalysisReports).
 
-    Batch responses contain at least one purl key and no top-level 'scanned' key.
-    Non-purl metadata keys like 'packageManager' may also be present.
+    Batch responses have no top-level 'scanned' key and at least one value that
+    is itself an AnalysisReport (dict with a 'scanned' key). Keys may be purl
+    strings (pkg:...) or image references (e.g. docker.io/node:22).
     """
     if not output:
         return False
-    has_purl = any(key.startswith("pkg:") for key in output.keys())
-    has_scanned = "scanned" in output
-    return has_purl and not has_scanned
+    if "scanned" in output:
+        return False
+    return any(
+        isinstance(v, dict) and "scanned" in v for v in output.values()
+    )
 
 
 def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_type: str) -> bool:
@@ -78,11 +81,11 @@ def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_typ
         return False
 
     if is_batch_response(output):
-        reports = {k: v for k, v in output.items() if k.startswith("pkg:")}
+        reports = {k: v for k, v in output.items() if isinstance(v, dict) and "scanned" in v}
         print(f"  INFO {analysis_type} detected batch response with {len(reports)} report(s)")
         ok = True
-        for purl, report in reports.items():
-            print(f"  Validating batch entry: {purl}")
+        for key, report in reports.items():
+            print(f"  Validating batch entry: {key}")
             if not validate_single_analysis(report, spec, analysis_type):
                 ok = False
         return ok
