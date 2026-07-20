@@ -2,6 +2,8 @@
 title: Dockerfile Hardened Image Recommendations
 description: Verify hardened image recommendations are returned for a Dockerfile with a non-hardened base image.
 expect_success: true
+env:
+  npm_config_ignore_scripts: ""
 stack_analysis:
   providers:
     rhtpa:

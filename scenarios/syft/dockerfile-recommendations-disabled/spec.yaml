@@ -4,6 +4,7 @@ description: Verify recommendations are suppressed when recommend=false query pa
 expect_success: true
 env:
   TRUSTIFY_DA_RECOMMEND: "false"
+  npm_config_ignore_scripts: ""
 stack_analysis:
   providers:
     rhtpa:
