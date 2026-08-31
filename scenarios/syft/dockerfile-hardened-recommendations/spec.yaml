@@ -4,18 +4,14 @@ description: Verify hardened image recommendations are returned for a Dockerfile
 expect_success: true
 stack_analysis:
   providers:
-    rhtpa:
-      sources:
-        - osv-github
+    rhtpa: {}
   recommendations:
     expect_recommendations: true
     expected_sources:
       - hardened
 component_analysis:
   providers:
-    rhtpa:
-      sources:
-        - osv-github
+    rhtpa: {}
   recommendations:
     expect_recommendations: true
     expected_sources:

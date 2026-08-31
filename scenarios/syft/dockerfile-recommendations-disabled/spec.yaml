@@ -6,15 +6,11 @@ env:
   TRUSTIFY_DA_RECOMMEND: "false"
 stack_analysis:
   providers:
-    rhtpa:
-      sources:
-        - osv-github
+    rhtpa: {}
   recommendations:
     expect_recommendations: false
 component_analysis:
   providers:
-    rhtpa:
-      sources:
-        - osv-github
+    rhtpa: {}
   recommendations:
     expect_recommendations: false

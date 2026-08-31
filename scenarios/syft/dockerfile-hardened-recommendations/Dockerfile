@@ -1,1 +1,1 @@
-FROM docker.io/node:22
+FROM docker.io/memcached:latest
