@@ -509,8 +509,9 @@ def run_scenario(language: str, cli_dir: str, scenario_dir: Path, runtime: str) 
                             return False
                     else:
                         print("  FAIL Expected success but command failed")
-                        print(result.stdout[:500])
-                        print(result.stderr[:500])
+                        print(f"  exit code: {result.returncode}")
+                        print("STDOUT:", result.stdout)
+                        print("STDERR:", result.stderr)
                         return False
                 else:
                     if result.returncode != 0:
