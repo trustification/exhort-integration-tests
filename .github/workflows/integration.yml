@@ -113,6 +113,10 @@ jobs:
           - python-3.12-pyproject
           - cargo-stable
           - syft
+        exclude:
+          # syft/OCI image analysis needs skopeo, which has no native Windows build
+          - os: windows-latest
+            runtime: syft
 
     steps:
       - name: Configure Git for Windows paths
