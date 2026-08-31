@@ -54,8 +54,47 @@ def get_os_name() -> str:
         return "unknown"
 
 
+def is_batch_response(output: Dict[str, Any]) -> bool:
+    """Detect whether the output is a batch response (map of AnalysisReports).
+
+    Batch responses have no top-level 'scanned' key and at least one value that
+    is itself an AnalysisReport (dict with a 'scanned' key). Keys may be purl
+    strings (pkg:...) or image references (e.g. docker.io/node:22).
+    """
+    if not output:
+        return False
+    if "scanned" in output:
+        return False
+    return any(
+        isinstance(v, dict) and "scanned" in v for v in output.values()
+    )
+
+
 def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_type: str) -> bool:
-    """Validate analysis results using structural and invariant checks."""
+    """Validate analysis results using structural and invariant checks.
+
+    Handles both single AnalysisReport and batch responses (purl-keyed map).
+    For batch responses, each inner report is validated independently.
+    """
+    if not output or not isinstance(output, dict):
+        print(f"  FAIL {analysis_type} output is empty or not a dictionary")
+        return False
+
+    if is_batch_response(output):
+        reports = {k: v for k, v in output.items() if isinstance(v, dict) and "scanned" in v}
+        print(f"  INFO {analysis_type} detected batch response with {len(reports)} report(s)")
+        ok = True
+        for key, report in reports.items():
+            print(f"  Validating batch entry: {key}")
+            if not validate_single_analysis(report, spec, analysis_type):
+                ok = False
+        return ok
+
+    return validate_single_analysis(output, spec, analysis_type)
+
+
+def validate_single_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_type: str) -> bool:
+    """Validate a single AnalysisReport against the spec."""
     if not output or not isinstance(output, dict):
         print(f"  FAIL {analysis_type} output is empty or not a dictionary")
         return False
@@ -190,6 +229,11 @@ def validate_analysis(output: Dict[str, Any], spec: Dict[str, Any], analysis_typ
         if not validate_licenses(output, expected["licenses"], analysis_type):
             ok = False
 
+    # --- Recommendation validation ---
+    if "recommendations" in expected:
+        if not validate_recommendations(output, expected["recommendations"], analysis_type):
+            ok = False
+
     if ok:
         print(f"  PASS {analysis_type} structural and invariant checks passed")
 
@@ -278,6 +322,56 @@ def validate_licenses(output: Dict[str, Any], license_spec: Dict[str, Any], cont
     return ok
 
 
+def validate_recommendations(output: Dict[str, Any], rec_spec: Dict[str, Any], analysis_type: str) -> bool:
+    """Validate recommendation data in the analysis response."""
+    expect_present = rec_spec.get("expect_recommendations", True)
+    expected_sources = rec_spec.get("expected_sources", [])
+
+    # Count recommendations from two locations:
+    # 1. Vulnerability source summaries: providers.*.sources.*.summary.recommendations
+    # 2. Hardened image recommendations: providers.*.recommendations.hardened.summary.total
+    total_recommendations = 0
+    found_sources = set()
+    providers = output.get("providers", {})
+    for prov_name, prov_data in providers.items():
+        sources = prov_data.get("sources", {})
+        for src_name, src_data in sources.items():
+            summary = src_data.get("summary", {})
+            total_recommendations += summary.get("recommendations", 0)
+
+        # Check hardened image recommendations
+        recs = prov_data.get("recommendations", {})
+        for rec_source, rec_data in recs.items():
+            rec_total = rec_data.get("summary", {}).get("total", 0)
+            total_recommendations += rec_total
+            if rec_total > 0:
+                found_sources.add(rec_source)
+
+    ok = True
+
+    if expect_present:
+        if total_recommendations == 0:
+            print(f"  FAIL {analysis_type} expected recommendations but found none")
+            ok = False
+    else:
+        if total_recommendations > 0:
+            print(f"  FAIL {analysis_type} expected no recommendations but found {total_recommendations}")
+            ok = False
+
+    # Check recommendation sources if specified
+    if expected_sources and expect_present and ok:
+        for expected_source in expected_sources:
+            if expected_source not in found_sources:
+                print(f"  FAIL {analysis_type} expected recommendation source '{expected_source}' "
+                      f"not found (found: {found_sources or 'none'})")
+                ok = False
+
+    if ok:
+        print(f"  PASS {analysis_type} recommendation checks passed")
+
+    return ok
+
+
 def validate_license_command(output: Dict[str, Any]) -> bool:
     """Validate the response from the license command."""
     if not output or not isinstance(output, dict):
@@ -351,68 +445,92 @@ def run_scenario(language: str, cli_dir: str, scenario_dir: Path, runtime: str) 
     with open(spec_file) as f:
         spec = yaml.safe_load(f)
 
+    # Support manifest_file override from spec.yaml (e.g. Containerfile)
+    manifest_file = spec.get("manifest_file", get_manifest_file(runtime))
+
     print("---")
     print(f"Scenario: {spec['title']}")
     print(f"Description: {spec['description']}")
-    print(f"Manifest: {scenario_dir / get_manifest_file(runtime)}")
+    print(f"Manifest: {scenario_dir / manifest_file}")
     print(f"Expect success: {spec['expect_success']}")
 
-    manifest_file = get_manifest_file(runtime)
     commands = get_commands(language, cli_dir, str(scenario_dir), manifest_file)
 
-    for cmd in commands:
-        print(f"Executing: {cmd}")
-        try:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    # Apply extra environment variables from spec (e.g. TRUSTIFY_DA_RECOMMEND)
+    extra_env = spec.get("env") or {}
+    original_env = {}
+    for key, value in extra_env.items():
+        original_env[key] = os.environ.get(key)
+        os.environ[key] = str(value)
 
-            if spec["expect_success"]:
-                if result.returncode == 0:
-                    print("  PASS Command succeeded as expected")
+    try:
+        for cmd in commands:
+            # Skip license command for runtimes that do not support it
+            if "license" in cmd and "stack" not in cmd and "component" not in cmd:
+                if runtime.startswith("syft"):
+                    print(f"  WARN license command not applicable for {runtime}, skipping")
+                    continue
 
-                    # Handle HTML output
-                    if "--html" in cmd:
-                        if not validate_html_output(result.stdout):
-                            return False
-                        continue
+            print(f"Executing: {cmd}")
+            try:
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
-                    # Parse the command output as JSON
-                    try:
-                        output = json.loads(result.stdout)
+                if spec["expect_success"]:
+                    if result.returncode == 0:
+                        print("  PASS Command succeeded as expected")
 
-                        if "component" in cmd:
-                            print("Validating component analysis...")
-                            if not validate_analysis(output, spec, "component_analysis"):
+                        # Handle HTML output
+                        if "--html" in cmd:
+                            if not validate_html_output(result.stdout):
                                 return False
-                        elif "license" in cmd and "stack" not in cmd and "component" not in cmd:
-                            print("Validating license command...")
-                            license_spec = spec.get("license_check", {})
-                            if license_spec.get("expect_success", True):
-                                if not validate_license_command(output):
+                            continue
+
+                        # Parse the command output as JSON
+                        try:
+                            output = json.loads(result.stdout)
+
+                            if "component" in cmd:
+                                print("Validating component analysis...")
+                                if not validate_analysis(output, spec, "component_analysis"):
                                     return False
-                        elif "stack" in cmd and not any(flag in cmd for flag in ["--summary", "--html"]):
-                            print("Validating stack analysis...")
-                            if not validate_analysis(output, spec, "stack_analysis"):
-                                return False
-                    except json.JSONDecodeError:
-                        print("  FAIL Failed to parse command output as JSON")
-                        print("Output:", result.stdout[:500])
+                            elif "license" in cmd and "stack" not in cmd and "component" not in cmd:
+                                print("Validating license command...")
+                                license_spec = spec.get("license_check", {})
+                                if license_spec.get("expect_success", True):
+                                    if not validate_license_command(output):
+                                        return False
+                            elif "stack" in cmd and not any(flag in cmd for flag in ["--summary", "--html"]):
+                                print("Validating stack analysis...")
+                                if not validate_analysis(output, spec, "stack_analysis"):
+                                    return False
+                        except json.JSONDecodeError:
+                            print("  FAIL Failed to parse command output as JSON")
+                            print("Output:", result.stdout[:500])
+                            return False
+                    else:
+                        print("  FAIL Expected success but command failed")
+                        print(f"  exit code: {result.returncode}")
+                        print("STDOUT:", result.stdout)
+                        print("STDERR:", result.stderr)
                         return False
                 else:
-                    print("  FAIL Expected success but command failed")
-                    print(result.stdout[:500])
-                    print(result.stderr[:500])
-                    return False
+                    if result.returncode != 0:
+                        print("  PASS Failure as expected")
+                    else:
+                        print("  FAIL Expected failure but command succeeded")
+                        print(result.stdout[:500])
+                        print(result.stderr[:500])
+                        return False
+            except subprocess.SubprocessError as e:
+                print(f"  FAIL Error executing command: {e}")
+                return False
+    finally:
+        # Restore extra environment variables
+        for key, value in original_env.items():
+            if value is None:
+                os.environ.pop(key, None)
             else:
-                if result.returncode != 0:
-                    print("  PASS Failure as expected")
-                else:
-                    print("  FAIL Expected failure but command succeeded")
-                    print(result.stdout[:500])
-                    print(result.stderr[:500])
-                    return False
-        except subprocess.SubprocessError as e:
-            print(f"  FAIL Error executing command: {e}")
-            return False
+                os.environ[key] = value
 
     print("---")
     return True

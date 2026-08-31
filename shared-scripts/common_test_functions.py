@@ -18,7 +18,7 @@ def get_manifest_file(runtime: str) -> str:
     runtime = runtime.lower()
 
     if runtime.startswith("syft"):
-        return "TODO: Implement OCI CLI support for Syft"
+        return "Dockerfile"
 
     if runtime.startswith('go'):
         return "go.mod"
@@ -52,8 +52,7 @@ def get_package_manager(runtime: str) -> str:
     runtime = runtime.lower()
 
     if runtime.startswith("syft"):
-        print(f"TODO: Implement Integration Test support for {runtime}")
-        sys.exit(0)
+        return "syft"
 
     # Handle Go runtimes
     if runtime.startswith('go'):

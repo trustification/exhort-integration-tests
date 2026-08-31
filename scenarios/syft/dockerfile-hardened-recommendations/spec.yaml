@@ -1,0 +1,22 @@
+# Dockerfile hardened image recommendations scenario
+title: Dockerfile Hardened Image Recommendations
+description: Verify hardened image recommendations are returned for a Dockerfile with a non-hardened base image.
+expect_success: true
+env:
+  # Pin the platform so the CLI doesn't need docker/podman to detect it when
+  # resolving the multi-arch :latest tag (skopeo handles the digest lookup).
+  TRUSTIFY_DA_IMAGE_PLATFORM: "linux/amd64"
+stack_analysis:
+  providers:
+    rhtpa: {}
+  recommendations:
+    expect_recommendations: true
+    expected_sources:
+      - hardened
+component_analysis:
+  providers:
+    rhtpa: {}
+  recommendations:
+    expect_recommendations: true
+    expected_sources:
+      - hardened

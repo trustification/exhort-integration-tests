@@ -142,6 +142,18 @@ case "$RUNTIME" in
     esac
     echo "Installed Syft version:"
     syft version
+    # The DA CLI shells out to skopeo to resolve OCI image digests for
+    # Dockerfile/image analysis. Ensure it is present (preinstalled on ubuntu).
+    if ! command -v skopeo >/dev/null 2>&1; then
+      echo "Installing skopeo..."
+      case "$OS" in
+        macos) brew install skopeo ;;
+        linux) sudo apt-get update && sudo apt-get install -y skopeo ;;
+        *)     echo "skopeo is not available on $OS; syft image analysis unsupported"; exit 1 ;;
+      esac
+    fi
+    echo "Installed skopeo version:"
+    skopeo --version
     ;;
   "none")
     echo "No additional runtime setup required."
