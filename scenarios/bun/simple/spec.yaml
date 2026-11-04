@@ -1,14 +1,14 @@
 # simple scenario specification
-# NOTE: scanned counts are provisional (best-effort from `bun install` resolution of the
-# same dependency set as the pnpm scenario). Confirm against a real backend scan once the
-# bun client support is merged into the built CLI.
+# NOTE: counts are confirmed against a real backend scan. They differ from the pnpm/yarn
+# scenarios because bun.lock was generated recently and resolves a newer graph (babel 7.29,
+# browserslist 4.29), which pulls in packages the older pinned lockfiles do not have.
 title: Simple bun Scenario
 description: Test a simple Node.js project using bun with a few dependencies.
 expect_success: true
 stack_analysis:
   scanned:
     direct: 4
-    transitive: 113
+    transitive: 114
   providers:
     rhtpa:
       sources:
