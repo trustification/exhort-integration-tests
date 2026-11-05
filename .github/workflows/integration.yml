@@ -138,8 +138,7 @@ jobs:
       - name: Checkout integration tests repo
         uses: actions/checkout@v6
         with:
-          repository: a-oren/exhort-integration-tests
-          ref: TC-7012
+          repository: trustification/exhort-integration-tests
           path: integration-tests
 
       - name: Setup Node.js
