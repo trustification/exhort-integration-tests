@@ -155,6 +155,25 @@ case "$RUNTIME" in
     echo "Installed skopeo version:"
     skopeo --version
     ;;
+  "bun")
+    echo "Installing bun..."
+    case "$OS" in
+      windows)
+        # Install bun on Windows using the official installation script
+        powershell -c "irm bun.sh/install.ps1 | iex"
+        ;;
+      *)
+        # Install bun on Unix-like systems using the official installation script
+        curl -fsSL https://bun.sh/install | bash
+        ;;
+    esac
+    # Add bun to PATH for this session
+    export PATH="$HOME/.bun/bin:$PATH"
+    # Use GITHUB_PATH to prepend without clobbering the existing PATH
+    echo "$HOME/.bun/bin" >> $GITHUB_PATH
+    echo "Installed bun version:"
+    bun --version
+    ;;
   "none")
     echo "No additional runtime setup required."
     ;;

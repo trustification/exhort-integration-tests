@@ -4,7 +4,9 @@ No-runtime integration test runner.
 
 Verifies that the CLI fails gracefully when ecosystem runtimes are unavailable.
 Sets all TRUSTIFY_DA_*_PATH and EXHORT_*_PATH env vars to "INVALID" so the CLI
-cannot discover any package manager, then asserts that every command exits non-zero.
+cannot discover any package manager, then asserts that every command exits non-zero —
+except for the JavaScript client's lockfile-only runtimes (see LOCKFILE_ONLY_RUNTIMES),
+which analyze manifests/lockfiles directly and are expected to succeed without a runtime.
 
 Usage: python run_tests_no_runtime.py <language> <cli_dir> <runtime>
 """
@@ -22,6 +24,12 @@ from common_test_functions import (
     get_package_manager
 )
 
+# Ecosystems whose JavaScript-client analysis reads manifests/lockfiles directly
+# without a package-manager runtime
+# Only the JavaScript client reads lockfiles directly; the Java client's
+# JavaScript-ecosystem providers still invoke package managers (see language guard below).
+LOCKFILE_ONLY_RUNTIMES = {"npm", "yarn-classic", "yarn-berry", "pnpm", "bun"}
+
 def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
     """Run the no-runtime test for a specific runtime."""
     script_dir = Path(__file__).parent
@@ -37,11 +45,23 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
         print(f"Simple scenario not found for runtime: {runtime}")
         return True
     
+    # The JavaScript client reads lockfiles directly, so npm/yarn-classic/yarn-berry/pnpm/bun
+    # succeed without a runtime; everything else (and every ecosystem for the Java client, whose
+    # JS-ecosystem providers still invoke package managers) must still fail when no runtime is
+    # available.
+    expect_success = (
+        language == "javascript"
+        and runtime.lower() in LOCKFILE_ONLY_RUNTIMES
+    )
+
     print("---")
     print("Scenario: No runtime available")
     print("Description: It fails when no runtime is available")
     print(f"Manifest: {scenario_dir / get_manifest_file(runtime)}")
-    print("Expecting failure (no runtime available)")
+    if expect_success:
+        print("Expecting success (lockfile analysis, no runtime needed)")
+    else:
+        print("Expecting failure (no runtime available)")
     
     all_commands = get_commands(language, cli_dir, str(scenario_dir), get_manifest_file(runtime))
 
@@ -101,13 +121,21 @@ def run_no_runtime_test(language: str, cli_dir: str, runtime: str) -> bool:
         
         try:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-            
-            # All commands should fail since no runtime is available
-            if result.returncode == 0:
-                print("❌ Command succeeded but expected failure (no runtime available)")
-                return False
+
+            if expect_success:
+                # Lockfile-only runtimes analyze without a package-manager runtime.
+                if result.returncode == 0:
+                    print("✅ Command succeeded as expected (lockfile analysis, no runtime needed)")
+                else:
+                    print("❌ Command failed but expected success (lockfile analysis, no runtime needed)")
+                    return False
             else:
-                print("✅ Command failed as expected (no runtime available)")
+                # All other commands should fail since no runtime is available.
+                if result.returncode == 0:
+                    print("❌ Command succeeded but expected failure (no runtime available)")
+                    return False
+                else:
+                    print("✅ Command failed as expected (no runtime available)")
         finally:
             # Restore all original environment variables
             for env_var, original_value in env_vars_to_restore.items():

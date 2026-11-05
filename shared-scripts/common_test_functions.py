@@ -39,7 +39,8 @@ def get_manifest_file(runtime: str) -> str:
         "npm": "package.json",
         "yarn-classic": "package.json",
         "yarn-berry": "package.json",
-        "pnpm": "package.json"
+        "pnpm": "package.json",
+        "bun": "package.json"
     }
     manifest = manifest_map.get(runtime)
     if not manifest:
@@ -71,6 +72,7 @@ def get_package_manager(runtime: str) -> str:
         "yarn-classic": "yarn",
         "yarn-berry": "yarn",
         "pnpm": "pnpm",
+        "bun": "bun",
         "maven": "mvn",
         "gradle-groovy": "gradle",
         "gradle-kotlin": "gradle"
